@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AXIOM — Dopamine Recovery & Addiction Tracker</title>
+<meta name="description" content="Track dopamine recovery, build streaks, and feel alive. Free panic button, mood tracking, and journaling — no paywalls on the features that matter.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a25;
+--purple:#8b5cf6;--purple-light:#a78bfa;--purple-dark:#6d28d9;
+--pink:#ec4899;--blue:#3b82f6;
+--text:#f1f1f4;--text-muted:#9ca3af;--text-dim:#6b7280;
+--glow:rgba(139,92,246,0.15);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6}
+
+/* NAV */
+nav{position:fixed;top:0;width:100%;z-index:100;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;backdrop-filter:blur(20px);background:rgba(10,10,15,0.8);border-bottom:1px solid rgba(139,92,246,0.1);transition:all 0.3s}
+.nav-logo{display:flex;align-items:center;gap:0.75rem;font-weight:800;font-size:1.2rem;letter-spacing:0.5px}
+.nav-logo svg{width:32px;height:32px}
+.nav-links{display:flex;gap:2rem;align-items:center}
+.nav-links a{color:var(--text-muted);text-decoration:none;font-size:0.9rem;font-weight:500;transition:color 0.3s}
+.nav-links a:hover{color:var(--purple-light)}
+.nav-cta{background:var(--purple);color:#fff!important;padding:0.5rem 1.25rem;border-radius:8px;font-weight:600;transition:all 0.3s!important}
+.nav-cta:hover{background:var(--purple-dark);transform:translateY(-1px)}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;padding:6rem 2rem 4rem;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(139,92,246,0.12) 0%,transparent 60%),radial-gradient(ellipse at 80% 50%,rgba(236,72,153,0.06) 0%,transparent 40%);pointer-events:none}
+.hero-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.3;animation:float 8s ease-in-out infinite}
+.hero-orb-1{width:400px;height:400px;background:var(--purple);top:-100px;left:-100px;animation-delay:0s}
+.hero-orb-2{width:300px;height:300px;background:var(--pink);bottom:-50px;right:-50px;animation-delay:3s}
+@keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-30px)}}
+.hero-content{max-width:1200px;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;position:relative;z-index:1}
+.hero-text{display:flex;flex-direction:column;gap:1.5rem}
+.hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);padding:0.4rem 1rem;border-radius:100px;font-size:0.8rem;font-weight:600;color:var(--purple-light);width:fit-content}
+.hero-badge .dot{width:6px;height:6px;background:var(--purple-light);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+h1{font-size:clamp(2.5rem,5vw,4rem);font-weight:900;line-height:1.1;letter-spacing:-0.02em}
+h1 span{background:linear-gradient(135deg,var(--purple-light),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-desc{font-size:1.15rem;color:var(--text-muted);max-width:500px;line-height:1.7}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap;margin-top:0.5rem}
+.btn-primary{display:inline-flex;align-items:center;gap:0.75rem;background:linear-gradient(135deg,var(--purple),var(--purple-dark));color:#fff;padding:0.9rem 2rem;border-radius:14px;text-decoration:none;font-weight:700;font-size:1rem;transition:all 0.3s;border:none;cursor:pointer;box-shadow:0 4px 25px rgba(139,92,246,0.3)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 35px rgba(139,92,246,0.45)}
+.btn-secondary{display:inline-flex;align-items:center;gap:0.75rem;background:rgba(255,255,255,0.05);color:var(--text);padding:0.9rem 2rem;border-radius:14px;text-decoration:none;font-weight:600;font-size:1rem;transition:all 0.3s;border:1px solid rgba(255,255,255,0.1)}
+.btn-secondary:hover{background:rgba(255,255,255,0.1);border-color:rgba(139,92,246,0.3)}
+.hero-stats{display:flex;gap:2.5rem;margin-top:1rem}
+.stat{display:flex;flex-direction:column}
+.stat-num{font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,var(--purple-light),var(--text));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+
+/* PHONE MOCKUP */
+.hero-visual{display:flex;justify-content:center;align-items:center;position:relative}
+.phone-frame{width:280px;height:560px;background:var(--bg2);border-radius:40px;border:3px solid rgba(255,255,255,0.1);position:relative;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.5),0 0 60px rgba(139,92,246,0.15)}
+.phone-notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:28px;background:var(--bg);border-radius:0 0 20px 20px;z-index:2}
+.phone-img{width:100%;height:100%;object-fit:cover;border-radius:37px;position:absolute;inset:3px;width:calc(100% - 6px);height:calc(100% - 6px)}
+
+/* GALLERY */
+.gallery{padding:4rem 2rem;background:var(--bg2)}
+.gallery-inner{max-width:1100px;margin:0 auto;text-align:center}
+.gallery-scroll{display:flex;gap:2rem;justify-content:center;margin-top:2.5rem;flex-wrap:wrap}
+.gallery-item{width:220px;height:440px;border-radius:24px;overflow:hidden;border:2px solid rgba(255,255,255,0.08);box-shadow:0 15px 40px rgba(0,0,0,0.4);transition:all 0.4s;flex-shrink:0}
+.gallery-item:hover{transform:translateY(-8px) scale(1.02);border-color:rgba(139,92,246,0.4);box-shadow:0 20px 50px rgba(139,92,246,0.15)}
+.gallery-item img{width:100%;height:100%;object-fit:cover}
+.phone-glow{position:absolute;width:300px;height:300px;background:radial-gradient(circle,rgba(139,92,246,0.2),transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:-1}
+
+/* PROBLEM SECTION */
+.problem{padding:6rem 2rem;background:var(--bg2)}
+.section-inner{max-width:900px;margin:0 auto;text-align:center}
+.section-tag{color:var(--purple-light);font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:1rem}
+h2{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;margin-bottom:1.5rem;line-height:1.2}
+.problem-card{background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.15);border-radius:20px;padding:2.5rem;margin-top:2rem;text-align:left}
+.problem-quote{font-size:1.3rem;font-weight:600;color:#ef4444;line-height:1.5}
+.problem-detail{color:var(--text-muted);margin-top:1rem;font-size:1rem}
+.problem-timer{display:flex;align-items:center;gap:1rem;margin-top:1.5rem;padding:1rem;background:rgba(239,68,68,0.08);border-radius:12px}
+.timer-num{font-size:2.5rem;font-weight:900;color:#ef4444;font-variant-numeric:tabular-nums}
+.timer-text{color:var(--text-muted);font-size:0.9rem}
+.timer-text strong{color:var(--text);display:block}
+
+/* FEATURES */
+.features{padding:6rem 2rem}
+.features-inner{max-width:1100px;margin:0 auto}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;margin-top:3rem}
+.feature-card{background:var(--bg2);border:1px solid rgba(255,255,255,0.05);border-radius:20px;padding:2rem;transition:all 0.3s;position:relative;overflow:hidden}
+.feature-card:hover{border-color:rgba(139,92,246,0.3);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.3)}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--purple),transparent);opacity:0;transition:opacity 0.3s}
+.feature-card:hover::before{opacity:1}
+.feature-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1rem}
+.fi-panic{background:rgba(239,68,68,0.15);color:#ef4444}
+.fi-mood{background:rgba(59,130,246,0.15);color:#3b82f6}
+.fi-journal{background:rgba(16,185,129,0.15);color:#10b981}
+.fi-streak{background:rgba(245,158,11,0.15);color:#f59e0b}
+.fi-offline{background:rgba(139,92,246,0.15);color:var(--purple-light)}
+.fi-free{background:rgba(236,72,153,0.15);color:#ec4899}
+.feature-card h3{font-size:1.1rem;font-weight:700;margin-bottom:0.5rem}
+.feature-card p{color:var(--text-muted);font-size:0.9rem;line-height:1.6}
+.feature-tag{display:inline-block;padding:0.2rem 0.6rem;border-radius:6px;font-size:0.7rem;font-weight:700;margin-top:0.75rem;text-transform:uppercase;letter-spacing:0.5px}
+.tag-free{background:rgba(16,185,129,0.15);color:#10b981}
+.tag-instant{background:rgba(239,68,68,0.15);color:#ef4444}
+
+/* CTA */
+.cta{padding:6rem 2rem;text-align:center;position:relative;overflow:hidden}
+.cta-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(139,92,246,0.1) 0%,transparent 60%)}
+.cta-inner{position:relative;z-index:1;max-width:600px;margin:0 auto}
+.cta h2{margin-bottom:1rem}
+.cta p{color:var(--text-muted);margin-bottom:2rem;font-size:1.1rem}
+.cta-buttons{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+
+/* WAITLIST */
+.waitlist{padding:4rem 2rem;background:var(--bg2)}
+.waitlist-inner{max-width:600px;margin:0 auto;text-align:center}
+.waitlist-form{display:flex;gap:0.75rem;margin-top:1.5rem;flex-wrap:wrap;justify-content:center}
+.waitlist-form input{flex:1;min-width:250px;padding:0.9rem 1.25rem;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--text);font-size:1rem;font-family:inherit;outline:none;transition:border-color 0.3s}
+.waitlist-form input:focus{border-color:var(--purple)}
+.waitlist-form button{padding:0.9rem 2rem;border-radius:12px;background:linear-gradient(135deg,var(--purple),var(--purple-dark));color:#fff;font-weight:700;font-size:1rem;border:none;cursor:pointer;font-family:inherit;transition:all 0.3s}
+.waitlist-form button:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(139,92,246,0.4)}
+.waitlist-note{font-size:0.8rem;color:var(--text-dim);margin-top:0.75rem}
+
+/* FOOTER */
+footer{padding:3rem 2rem;text-align:center;border-top:1px solid rgba(255,255,255,0.05)}
+footer p{color:var(--text-dim);font-size:0.85rem}
+footer a{color:var(--purple-light);text-decoration:none}
+
+/* MOBILE */
+@media(max-width:768px){
+.hero-content{grid-template-columns:1fr;text-align:center;gap:3rem}
+.hero-text{align-items:center}
+.hero-desc{text-align:center}
+.hero-stats{justify-content:center}
+.nav-links{display:none}
+.phone-frame{width:240px;height:480px}
+.features-grid{grid-template-columns:1fr}
+}
+
+/* ANIMATIONS */
+.fade-in{opacity:0;transform:translateY(30px);transition:all 0.6s ease-out}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<nav>
+<div class="nav-logo">
+<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M20 4L36 34H4L20 4Z" stroke="#8b5cf6" stroke-width="2.5" fill="none"/>
+<path d="M20 14L28 30H12L20 14Z" stroke="#a78bfa" stroke-width="1.5" fill="none" opacity="0.6"/>
+</svg>
+AXIOM
+</div>
+<div class="nav-links">
+<a href="#features">Features</a>
+<a href="#download" class="nav-cta">Download Free</a>
+</div>
+</nav>
+
+<section class="hero">
+<div class="hero-bg"></div>
+<div class="hero-orb hero-orb-1"></div>
+<div class="hero-orb hero-orb-2"></div>
+<div class="hero-content">
+<div class="hero-text">
+<div class="hero-badge"><span class="dot"></span> Free & Open</div>
+<h1>Your brain is <span>healing.</span></h1>
+<p class="hero-desc">Track dopamine recovery, build streaks, and feel alive. The crisis features are free — because they should be.</p>
+<div class="hero-actions">
+<a href="https://play.google.com/store/apps/details?id=com.axiomapp.app" class="btn-primary" target="_blank">
+<svg width="20" height="22" viewBox="0 0 20 22" fill="currentColor"><path d="M1.571.955C1.213 1.19 1 1.596 1 2.056V19.944c0 .46.213.867.571 1.101l9.834-10.045L1.571.955zm.707-.707L13.112 10.5 10.6 13.012 2.278.248zM13.82 11.208l-2.815 2.815L2.278 21.752l10.834-7.729 2.513-2.513-1.805-1.302zm1.805-1.302L17.88 11l-2.255 1.094-1.805-1.302 1.805-1.302z"/></svg>
+Get on Google Play
+</a>
+<a href="#waitlist" class="btn-secondary">
+🍎 iOS Waitlist
+</a>
+</div>
+<div class="hero-stats">
+<div class="stat"><span class="stat-num">4.8★</span><span class="stat-label">Rating</span></div>
+<div class="stat"><span class="stat-num">100%</span><span class="stat-label">Free Core</span></div>
+<div class="stat"><span class="stat-num">0</span><span class="stat-label">Ads</span></div>
+</div>
+</div>
+<div class="hero-visual">
+<div class="phone-glow"></div>
+<div class="phone-frame">
+<div class="phone-notch"></div>
+<img src="screenshot1.jpg" alt="AXIOM App Dashboard" class="phone-img">
+</div>
+</div>
+</div>
+</section>
+
+<section class="gallery" id="screenshots">
+<div class="gallery-inner">
+<div class="section-tag">Inside the App</div>
+<h2>Built for recovery. Designed to keep you going.</h2>
+<div class="gallery-scroll">
+<div class="gallery-item fade-in"><img src="screenshot1.jpg" alt="AXIOM Dashboard"></div>
+<div class="gallery-item fade-in"><img src="screenshot2.jpg" alt="AXIOM Streak Tracking"></div>
+<div class="gallery-item fade-in"><img src="screenshot3.jpg" alt="AXIOM Recovery Tools"></div>
+</div>
+</div>
+</section>
+
+<section class="problem">
+<div class="section-inner">
+<div class="section-tag">The Problem</div>
+<h2>Recovery apps shouldn't profit from your crisis.</h2>
+<div class="problem-card fade-in">
+<div class="problem-quote">"I was mid-crisis, shaking, reached for the app I'd been paying $12/month for — and the panic button had a timer."</div>
+<div class="problem-detail">We tested the top-rated recovery app on the Play Store. The panic button — the feature you need most during a crisis — made you wait before it would work.</div>
+<div class="problem-timer">
+<div class="timer-num">143s</div>
+<div><div class="timer-text"><strong>Seconds to wait</strong>Before the panic button activates. During a crisis.</div></div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="features" id="features">
+<div class="features-inner">
+<div style="text-align:center">
+<div class="section-tag">Features</div>
+<h2>Everything you need. Nothing locked.</h2>
+</div>
+<div class="features-grid">
+<div class="feature-card fade-in">
+<div class="feature-icon fi-panic">🛑</div>
+<h3>Instant Panic Button</h3>
+<p>No timer. No paywall. No "watch an ad first." One tap, instant help — exactly when you need it.</p>
+<span class="feature-tag tag-instant">INSTANT</span>
+</div>
+<div class="feature-card fade-in">
+<div class="feature-icon fi-mood">📊</div>
+<h3>Mood Tracking</h3>
+<p>See your emotional patterns over time. Spot triggers before they hit. Your data stays on your device.</p>
+<span class="feature-tag tag-free">FREE</span>
+</div>
+<div class="feature-card fade-in">
+<div class="feature-icon fi-journal">📝</div>
+<h3>Journaling</h3>
+<p>Process what you're feeling in the moment. No prompts, no structure — just space to be honest with yourself.</p>
+<span class="feature-tag tag-free">FREE</span>
+</div>
+<div class="feature-card fade-in">
+<div class="feature-icon fi-streak">🔥</div>
+<h3>Streak Tracking</h3>
+<p>Watch the number grow. See how far you've come. Every day counts and every day is visible.</p>
+<span class="feature-tag tag-free">FREE</span>
+</div>
+<div class="feature-card fade-in">
+<div class="feature-icon fi-offline">📡</div>
+<h3>Works Offline</h3>
+<p>No internet? No problem. Everything works locally. No account required. Your data never leaves your phone.</p>
+<span class="feature-tag tag-free">FREE</span>
+</div>
+<div class="feature-card fade-in">
+<div class="feature-icon fi-free">💜</div>
+<h3>Actually Free</h3>
+<p>Not "free trial" free. Not "watch ads" free. The features you need during a crisis are free. Period.</p>
+<span class="feature-tag tag-free">FREE FOREVER</span>
+</div>
+</div>
+</div>
+</section>
+
+<section class="cta" id="download">
+<div class="cta-bg"></div>
+<div class="cta-inner fade-in">
+<div class="section-tag">Download</div>
+<h2>Start your recovery today.</h2>
+<p>Free on Android. No account needed. No data collected. Just you and your progress.</p>
+<div class="cta-buttons">
+<a href="https://play.google.com/store/apps/details?id=com.axiomapp.app" class="btn-primary" target="_blank">
+<svg width="20" height="22" viewBox="0 0 20 22" fill="currentColor"><path d="M1.571.955C1.213 1.19 1 1.596 1 2.056V19.944c0 .46.213.867.571 1.101l9.834-10.045L1.571.955zm.707-.707L13.112 10.5 10.6 13.012 2.278.248zM13.82 11.208l-2.815 2.815L2.278 21.752l10.834-7.729 2.513-2.513-1.805-1.302zm1.805-1.302L17.88 11l-2.255 1.094-1.805-1.302 1.805-1.302z"/></svg>
+Get on Google Play
+</a>
+</div>
+</div>
+</section>
+
+<section class="waitlist" id="waitlist">
+<div class="waitlist-inner fade-in">
+<div class="section-tag">Coming Soon</div>
+<h2>iOS is on the way. 🍎</h2>
+<p style="color:var(--text-muted);margin-top:0.5rem">Drop your email and we'll let you know the second it's live.</p>
+<form class="waitlist-form" onsubmit="handleWaitlist(event)">
+<input type="email" placeholder="your@email.com" required>
+<button type="submit">Join Waitlist</button>
+</form>
+<p class="waitlist-note">No spam. Just one email when iOS drops.</p>
+<p id="waitlist-success" style="display:none;color:#10b981;margin-top:1rem;font-weight:600">✓ You're on the list! We'll email you when iOS is ready.</p>
+</div>
+</section>
+
+<footer>
+<p>Built with 💜 by <a href="https://github.com/LunaMazeStudio" target="_blank">Luna Maze Studio</a> &middot; 2026</p>
+</footer>
+
+<script>
+// Scroll animations
+const observer = new IntersectionObserver((entries) => {
+entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible') });
+}, {threshold: 0.1});
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// Waitlist form
+function handleWaitlist(e) {
+e.preventDefault();
+const email = e.target.querySelector('input').value;
+// Store in localStorage for now (replace with real backend later)
+const list = JSON.parse(localStorage.getItem('axiom-waitlist') || '[]');
+list.push({email, date: new Date().toISOString()});
+localStorage.setItem('axiom-waitlist', JSON.stringify(list));
+e.target.style.display = 'none';
+document.getElementById('waitlist-success').style.display = 'block';
+}
+
+// Smooth nav background
+window.addEventListener('scroll', () => {
+const nav = document.querySelector('nav');
+nav.style.background = window.scrollY > 50 ? 'rgba(10,10,15,0.95)' : 'rgba(10,10,15,0.8)';
+});
+</script>
+</body>
+</html>
