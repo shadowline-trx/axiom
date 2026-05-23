@@ -3,326 +3,459 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AXIOM — Dopamine Recovery & Addiction Tracker</title>
-<meta name="description" content="Track dopamine recovery, build streaks, and feel alive. Free panic button, mood tracking, and journaling — no paywalls on the features that matter.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<title>AXIOM</title>
+<meta name="description" content="Dopamine recovery. Free. No paywalls. No timers.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{
---bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a25;
---purple:#8b5cf6;--purple-light:#a78bfa;--purple-dark:#6d28d9;
---pink:#ec4899;--blue:#3b82f6;
---text:#f1f1f4;--text-muted:#9ca3af;--text-dim:#6b7280;
---glow:rgba(139,92,246,0.15);
-}
 html{scroll-behavior:smooth}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6}
+body{font-family:'Inter',sans-serif;background:#030305;color:#f1f5f9;overflow-x:hidden;line-height:1.6;-webkit-font-smoothing:antialiased}
+::selection{background:#7c3aed;color:#fff}
+
+/* Film grain overlay */
+body::after{content:'';position:fixed;inset:0;z-index:9990;pointer-events:none;opacity:.018;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:128px}
+
+/* Custom cursor */
+.cur{position:fixed;width:10px;height:10px;background:#a78bfa;border-radius:50%;pointer-events:none;z-index:9999;mix-blend-mode:difference;transform:translate(-50%,-50%);transition:width .3s,height .3s,border .3s;will-change:transform}
+.cur.hov{width:40px;height:40px;border:1.5px solid #a78bfa;background:transparent}
+.cur-ring{position:fixed;width:32px;height:32px;border:1px solid rgba(167,139,250,.12);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);will-change:transform}
+@media(pointer:coarse){.cur,.cur-ring{display:none}body{cursor:auto}}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:#030305}
+::-webkit-scrollbar-thumb{background:#1e1e2e;border-radius:2px}
+
+/* Liquid glass */
+.glass{position:relative;background:rgba(255,255,255,.025);backdrop-filter:blur(40px) saturate(150%);-webkit-backdrop-filter:blur(40px) saturate(150%);border:1px solid rgba(255,255,255,.06);box-shadow:inset 0 .5px 1px rgba(255,255,255,.05),0 8px 32px rgba(0,0,0,.3)}
+.glass::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(170deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,.02) 40%,transparent 55%,transparent 75%,rgba(255,255,255,.03) 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;pointer-events:none}
 
 /* NAV */
-nav{position:fixed;top:0;width:100%;z-index:100;padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;backdrop-filter:blur(20px);background:rgba(10,10,15,0.8);border-bottom:1px solid rgba(139,92,246,0.1);transition:all 0.3s}
-.nav-logo{display:flex;align-items:center;gap:0.75rem;font-weight:800;font-size:1.2rem;letter-spacing:0.5px}
-.nav-logo svg{width:32px;height:32px}
-.nav-links{display:flex;gap:2rem;align-items:center}
-.nav-links a{color:var(--text-muted);text-decoration:none;font-size:0.9rem;font-weight:500;transition:color 0.3s}
-.nav-links a:hover{color:var(--purple-light)}
-.nav-cta{background:var(--purple);color:#fff!important;padding:0.5rem 1.25rem;border-radius:8px;font-weight:600;transition:all 0.3s!important}
-.nav-cta:hover{background:var(--purple-dark);transform:translateY(-1px)}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.25rem 2rem;transition:all .4s cubic-bezier(.16,1,.3,1)}
+nav.on{left:50%;right:auto;transform:translateX(-50%);top:.75rem;padding:.5rem 1.5rem;border-radius:100px;background:rgba(8,8,12,.7);backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.05);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.ni{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:1300px;margin:0 auto}
+.nl{display:flex;align-items:center;gap:.6rem;font-weight:800;font-size:1rem;letter-spacing:1px;text-transform:uppercase}
+.nl svg{width:22px;height:22px}
+.nx{display:flex;gap:2rem;align-items:center}
+.nx a{color:#64748b;text-decoration:none;font-size:.72rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;transition:color .3s}
+.nx a:hover{color:#f1f5f9}
+.nc{background:linear-gradient(135deg,#7c3aed,#4c1d95);color:#fff;padding:.45rem 1.25rem;border-radius:100px;font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;text-decoration:none;transition:all .3s cubic-bezier(.16,1,.3,1);box-shadow:0 4px 16px rgba(124,58,237,.3)}
+.nc:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,58,237,.45)}
 
 /* HERO */
-.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;padding:6rem 2rem 4rem;overflow:hidden}
-.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(139,92,246,0.12) 0%,transparent 60%),radial-gradient(ellipse at 80% 50%,rgba(236,72,153,0.06) 0%,transparent 40%);pointer-events:none}
-.hero-orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.3;animation:float 8s ease-in-out infinite}
-.hero-orb-1{width:400px;height:400px;background:var(--purple);top:-100px;left:-100px;animation-delay:0s}
-.hero-orb-2{width:300px;height:300px;background:var(--pink);bottom:-50px;right:-50px;animation-delay:3s}
-@keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-30px)}}
-.hero-content{max-width:1200px;width:100%;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;position:relative;z-index:1}
-.hero-text{display:flex;flex-direction:column;gap:1.5rem}
-.hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(139,92,246,0.15);border:1px solid rgba(139,92,246,0.3);padding:0.4rem 1rem;border-radius:100px;font-size:0.8rem;font-weight:600;color:var(--purple-light);width:fit-content}
-.hero-badge .dot{width:6px;height:6px;background:var(--purple-light);border-radius:50%;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
-h1{font-size:clamp(2.5rem,5vw,4rem);font-weight:900;line-height:1.1;letter-spacing:-0.02em}
-h1 span{background:linear-gradient(135deg,var(--purple-light),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero-desc{font-size:1.15rem;color:var(--text-muted);max-width:500px;line-height:1.7}
-.hero-actions{display:flex;gap:1rem;flex-wrap:wrap;margin-top:0.5rem}
-.btn-primary{display:inline-flex;align-items:center;gap:0.75rem;background:linear-gradient(135deg,var(--purple),var(--purple-dark));color:#fff;padding:0.9rem 2rem;border-radius:14px;text-decoration:none;font-weight:700;font-size:1rem;transition:all 0.3s;border:none;cursor:pointer;box-shadow:0 4px 25px rgba(139,92,246,0.3)}
-.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 35px rgba(139,92,246,0.45)}
-.btn-secondary{display:inline-flex;align-items:center;gap:0.75rem;background:rgba(255,255,255,0.05);color:var(--text);padding:0.9rem 2rem;border-radius:14px;text-decoration:none;font-weight:600;font-size:1rem;transition:all 0.3s;border:1px solid rgba(255,255,255,0.1)}
-.btn-secondary:hover{background:rgba(255,255,255,0.1);border-color:rgba(139,92,246,0.3)}
-.hero-stats{display:flex;gap:2.5rem;margin-top:1rem}
-.stat{display:flex;flex-direction:column}
-.stat-num{font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,var(--purple-light),var(--text));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.stat-label{font-size:0.75rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:1px;font-weight:600}
+.hero{min-height:100vh;display:flex;align-items:center;position:relative;padding:0 2.5rem;overflow:hidden}
+.hero-bg{position:absolute;inset:0;z-index:0}
+.hero-bg::before{content:'';position:absolute;inset:-20%;background:radial-gradient(ellipse 50% 40% at 30% 50%,rgba(124,58,237,.2),transparent 60%),radial-gradient(ellipse 40% 50% at 70% 30%,rgba(52,211,153,.08),transparent 50%),radial-gradient(ellipse 60% 30% at 50% 80%,rgba(124,58,237,.12),transparent 50%);animation:bgDrift 18s ease-in-out infinite alternate}
+@keyframes bgDrift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(-2%,1%) scale(1.03)}100%{transform:translate(1%,-1%) scale(1.01)}}
+.hero-vig{position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 45%,transparent 0%,#030305 75%);z-index:1;pointer-events:none}
+.hero-content{max-width:1300px;width:100%;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;position:relative;z-index:2;padding-top:6rem}
 
-/* PHONE MOCKUP */
-.hero-visual{display:flex;justify-content:center;align-items:center;position:relative}
-.phone-frame{width:280px;height:560px;background:var(--bg2);border-radius:40px;border:3px solid rgba(255,255,255,0.1);position:relative;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,0.5),0 0 60px rgba(139,92,246,0.15)}
-.phone-notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:28px;background:var(--bg);border-radius:0 0 20px 20px;z-index:2}
-.phone-img{width:100%;height:100%;object-fit:cover;border-radius:37px;position:absolute;inset:3px;width:calc(100% - 6px);height:calc(100% - 6px)}
+.hero-badge{display:inline-flex;align-items:center;gap:.5rem;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.25);padding:.35rem .9rem;border-radius:100px;font-size:.7rem;font-weight:600;color:#a78bfa;letter-spacing:.5px;margin-bottom:2rem;backdrop-filter:blur(8px)}
+.hero-badge span{width:5px;height:5px;background:#a78bfa;border-radius:50%;animation:pulse 2.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* GALLERY */
-.gallery{padding:4rem 2rem;background:var(--bg2)}
-.gallery-inner{max-width:1100px;margin:0 auto;text-align:center}
-.gallery-scroll{display:flex;gap:2rem;justify-content:center;margin-top:2.5rem;flex-wrap:wrap}
-.gallery-item{width:220px;height:440px;border-radius:24px;overflow:hidden;border:2px solid rgba(255,255,255,0.08);box-shadow:0 15px 40px rgba(0,0,0,0.4);transition:all 0.4s;flex-shrink:0}
-.gallery-item:hover{transform:translateY(-8px) scale(1.02);border-color:rgba(139,92,246,0.4);box-shadow:0 20px 50px rgba(139,92,246,0.15)}
-.gallery-item img{width:100%;height:100%;object-fit:cover}
-.phone-glow{position:absolute;width:300px;height:300px;background:radial-gradient(circle,rgba(139,92,246,0.2),transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:-1}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(6rem,14vw,13rem);font-weight:400;line-height:.85;letter-spacing:.04em;text-transform:uppercase}
+.hero-title .main{display:block;background:linear-gradient(180deg,#f8fafc 20%,#475569 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hero-title .sub{display:block;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.22em;letter-spacing:.08em;text-transform:none;margin-top:.4rem;font-weight:400;background:linear-gradient(135deg,#a78bfa,#34d399);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 
-/* PROBLEM SECTION */
-.problem{padding:6rem 2rem;background:var(--bg2)}
-.section-inner{max-width:900px;margin:0 auto;text-align:center}
-.section-tag{color:var(--purple-light);font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:1rem}
-h2{font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:800;margin-bottom:1.5rem;line-height:1.2}
-.problem-card{background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.15);border-radius:20px;padding:2.5rem;margin-top:2rem;text-align:left}
-.problem-quote{font-size:1.3rem;font-weight:600;color:#ef4444;line-height:1.5}
-.problem-detail{color:var(--text-muted);margin-top:1rem;font-size:1rem}
-.problem-timer{display:flex;align-items:center;gap:1rem;margin-top:1.5rem;padding:1rem;background:rgba(239,68,68,0.08);border-radius:12px}
-.timer-num{font-size:2.5rem;font-weight:900;color:#ef4444;font-variant-numeric:tabular-nums}
-.timer-text{color:var(--text-muted);font-size:0.9rem}
-.timer-text strong{color:var(--text);display:block}
+.hero-desc{font-family:'Cormorant Garamond',serif;font-size:1.35rem;color:#94a3b8;max-width:420px;line-height:1.5;margin-top:2rem;font-weight:400}
+.hero-desc strong{color:#f1f5f9;font-weight:600}
+
+.hero-actions{display:flex;gap:1rem;margin-top:2.5rem}
+.btn{display:inline-flex;align-items:center;gap:.6rem;padding:1rem 1.75rem;border-radius:12px;text-decoration:none;font-weight:600;font-size:.9rem;transition:all .35s cubic-bezier(.16,1,.3,1);border:none;position:relative;overflow:hidden}
+.btn-p{background:linear-gradient(135deg,#7c3aed,#4c1d95);color:#fff;box-shadow:0 4px 20px rgba(124,58,237,.35)}
+.btn-p::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);transform:translateX(-100%);transition:transform .6s}
+.btn-p:hover::after{transform:translateX(100%)}
+.btn-p:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(124,58,237,.5)}
+.btn-s{background:rgba(255,255,255,.04);color:#f1f5f9;border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(12px)}
+.btn-s:hover{background:rgba(255,255,255,.07);border-color:rgba(124,58,237,.3)}
+
+.hero-stats{display:flex;gap:3rem;margin-top:3rem}
+.stat-n{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:.02em;color:#f1f5f9}
+.stat-l{font-size:.6rem;color:#475569;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin-top:.2rem}
+
+/* PHONE */
+.phone-wrap{display:flex;justify-content:center;align-items:center;position:relative;perspective:1200px}
+.phone-float{transform-style:preserve-3d;animation:pf 8s ease-in-out infinite}
+@keyframes pf{0%,100%{transform:translateY(0) rotateY(-15deg) rotateX(5deg)}50%{transform:translateY(-20px) rotateY(-10deg) rotateX(3deg)}}
+.pg{position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(124,58,237,.35),transparent 60%);top:50%;left:50%;transform:translate(-50%,-50%);filter:blur(60px);z-index:-1;animation:pgA 5s ease-in-out infinite}
+@keyframes pgA{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:.9;transform:translate(-50%,-50%) scale(1.2)}}
+.pf{width:280px;height:580px;border-radius:44px;padding:4px;background:linear-gradient(180deg,rgba(255,255,255,.15),rgba(255,255,255,.03) 50%,rgba(255,255,255,.01));position:relative;box-shadow:0 50px 120px rgba(0,0,0,.6),0 0 80px rgba(124,58,237,.15),inset 0 1px 2px rgba(255,255,255,.1)}
+.pf::before{content:'';position:absolute;inset:0;border-radius:44px;background:linear-gradient(180deg,rgba(255,255,255,.08),transparent 40%);pointer-events:none;z-index:3}
+.pfi{width:100%;height:100%;background:#0a0a12;border-radius:40px;overflow:hidden;position:relative}
+.pn{position:absolute;top:0;left:50%;transform:translateX(-50%);width:130px;height:30px;background:#030305;border-radius:0 0 22px 22px;z-index:4}
+.pfi img{width:100%;height:100%;object-fit:cover}
+.pr{position:absolute;inset:0;border-radius:40px;background:linear-gradient(135deg,rgba(255,255,255,.06) 0%,transparent 30%,transparent 70%,rgba(255,255,255,.02) 100%);pointer-events:none;z-index:5}
+
+/* SECTIONS */
+.sec{position:relative;padding:10rem 2.5rem}
+.si{max-width:1100px;margin:0 auto}
+.sl{color:#a78bfa;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:3px;margin-bottom:1.5rem}
+.st{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,6vw,5rem);font-weight:400;line-height:.9;letter-spacing:.04em;text-transform:uppercase}
+
+/* TRANSITION BAR */
+.tbar{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);width:100%}
+
+/* CRISIS */
+.crisis{background:#030305;position:relative;overflow:hidden}
+.crisis::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 50% at 50% 50%,rgba(251,113,133,.06),transparent 55%);pointer-events:none}
+.cq{font-family:'Cormorant Garamond',serif;font-size:clamp(1.6rem,3vw,2.4rem);font-style:italic;color:#fb7185;line-height:1.5;max-width:750px;margin:0 auto 3rem;text-align:center;position:relative;padding:0 2rem}
+.cq::before,.cq::after{position:absolute;font-family:'Cormorant Garamond',serif;font-size:5rem;opacity:.12;line-height:1}
+.cq::before{content:'"';left:0;top:-.8rem}
+.cq::after{content:'"';right:0;bottom:-2rem}
+.ct-wrap{display:flex;align-items:center;justify-content:center;gap:2.5rem;padding:2rem 3rem;background:rgba(251,113,133,.04);border:1px solid rgba(251,113,133,.08);border-radius:24px;max-width:600px;margin:0 auto}
+.ct-n{font-family:'Bebas Neue',sans-serif;font-size:7rem;color:#fb7185;line-height:1;letter-spacing:.02em;text-shadow:0 0 80px rgba(251,113,133,.25)}
+.ct-t{color:#64748b;font-size:.9rem;text-align:left;max-width:180px;line-height:1.6}
+.ct-t strong{color:#f1f5f9;display:block;font-size:1.1rem;margin-bottom:.25rem;font-weight:600}
+
+/* SHOWCASE */
+.showcase{background:#08080c;position:relative}
+.showcase::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 40% at 50% 0%,rgba(124,58,237,.07),transparent 55%);pointer-events:none}
+.sg{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:4rem;align-items:start}
+.sc{position:relative;border-radius:28px;padding:3px;background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.02));transition:all .5s cubic-bezier(.16,1,.3,1)}
+.sc:nth-child(2){margin-top:5rem}
+.sc:hover{transform:translateY(-12px);box-shadow:0 30px 60px rgba(0,0,0,.4)}
+.sci{border-radius:25px;overflow:hidden;position:relative;background:#0a0a12}
+.sci img{width:100%;height:auto;display:block;transition:transform .7s cubic-bezier(.16,1,.3,1)}
+.sc:hover .sci img{transform:scale(1.05)}
+.scl{position:absolute;bottom:1rem;left:1rem;padding:.4rem 1rem;border-radius:100px;font-size:.7rem;font-weight:600;background:rgba(8,8,12,.85);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.06);color:#e2e8f0}
 
 /* FEATURES */
-.features{padding:6rem 2rem}
-.features-inner{max-width:1100px;margin:0 auto}
-.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;margin-top:3rem}
-.feature-card{background:var(--bg2);border:1px solid rgba(255,255,255,0.05);border-radius:20px;padding:2rem;transition:all 0.3s;position:relative;overflow:hidden}
-.feature-card:hover{border-color:rgba(139,92,246,0.3);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,0.3)}
-.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--purple),transparent);opacity:0;transition:opacity 0.3s}
-.feature-card:hover::before{opacity:1}
-.feature-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:1rem}
-.fi-panic{background:rgba(239,68,68,0.15);color:#ef4444}
-.fi-mood{background:rgba(59,130,246,0.15);color:#3b82f6}
-.fi-journal{background:rgba(16,185,129,0.15);color:#10b981}
-.fi-streak{background:rgba(245,158,11,0.15);color:#f59e0b}
-.fi-offline{background:rgba(139,92,246,0.15);color:var(--purple-light)}
-.fi-free{background:rgba(236,72,153,0.15);color:#ec4899}
-.feature-card h3{font-size:1.1rem;font-weight:700;margin-bottom:0.5rem}
-.feature-card p{color:var(--text-muted);font-size:0.9rem;line-height:1.6}
-.feature-tag{display:inline-block;padding:0.2rem 0.6rem;border-radius:6px;font-size:0.7rem;font-weight:700;margin-top:0.75rem;text-transform:uppercase;letter-spacing:0.5px}
-.tag-free{background:rgba(16,185,129,0.15);color:#10b981}
-.tag-instant{background:rgba(239,68,68,0.15);color:#ef4444}
+.features{background:#030305;position:relative}
+.features::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 50% 35% at 50% 0%,rgba(124,58,237,.06),transparent 50%);pointer-events:none}
+.fg{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-top:4rem}
+.fc{padding:2.5rem;border-radius:24px;transition:all .4s cubic-bezier(.16,1,.3,1);position:relative;overflow:hidden;min-height:280px;display:flex;flex-direction:column;justify-content:space-between}
+.fc::after{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,rgba(167,139,250,.4),transparent);opacity:0;transition:opacity .4s}
+.fc:hover{transform:translateY(-6px)}
+.fc:hover::after{opacity:1}
+.fc .fi{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1.5rem}
+.fc h3{font-size:1.1rem;font-weight:700;margin-bottom:.5rem}
+.fc p{color:#64748b;font-size:.88rem;line-height:1.7}
+.ftg{display:inline-block;padding:.2rem .65rem;border-radius:100px;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:1rem}
+.f1{background:rgba(251,113,133,.1);color:#fb7185}
+.f2{background:rgba(59,130,246,.1);color:#60a5fa}
+.f3{background:rgba(52,211,153,.1);color:#34d399}
+.f4{background:rgba(245,158,11,.1);color:#fbbf24}
+.f5{background:rgba(124,58,237,.1);color:#a78bfa}
+.f6{background:rgba(236,72,153,.1);color:#f472b6}
+
+/* PHILOSOPHY */
+.philo{min-height:80vh;display:flex;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden;padding:6rem 2rem}
+.philo::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 45% 45% at 50% 50%,rgba(124,58,237,.1),transparent 50%);pointer-events:none}
+.pt{font-family:'Bebas Neue',sans-serif;font-size:clamp(4rem,10vw,8.5rem);line-height:.85;letter-spacing:.04em;text-transform:uppercase;margin-bottom:2.5rem}
+.pt .l{display:block}
+.pt .a{background:linear-gradient(135deg,#34d399,#a78bfa);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.pd{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:#64748b;max-width:480px;margin:0 auto;line-height:1.7;font-weight:400}
 
 /* CTA */
-.cta{padding:6rem 2rem;text-align:center;position:relative;overflow:hidden}
-.cta-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(139,92,246,0.1) 0%,transparent 60%)}
-.cta-inner{position:relative;z-index:1;max-width:600px;margin:0 auto}
-.cta h2{margin-bottom:1rem}
-.cta p{color:var(--text-muted);margin-bottom:2rem;font-size:1.1rem}
-.cta-buttons{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+.cta{padding:8rem 2.5rem;text-align:center;position:relative}
+.cta::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 100%,rgba(124,58,237,.1),transparent 50%);pointer-events:none}
+.cg{max-width:560px;margin:0 auto;padding:3.5rem 2.5rem;border-radius:32px;position:relative;z-index:1}
+.cg .st{margin-bottom:.75rem}
+.cg p{color:#64748b;font-size:1.05rem;line-height:1.7;max-width:420px;margin:0 auto 2rem}
 
 /* WAITLIST */
-.waitlist{padding:4rem 2rem;background:var(--bg2)}
-.waitlist-inner{max-width:600px;margin:0 auto;text-align:center}
-.waitlist-form{display:flex;gap:0.75rem;margin-top:1.5rem;flex-wrap:wrap;justify-content:center}
-.waitlist-form input{flex:1;min-width:250px;padding:0.9rem 1.25rem;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--text);font-size:1rem;font-family:inherit;outline:none;transition:border-color 0.3s}
-.waitlist-form input:focus{border-color:var(--purple)}
-.waitlist-form button{padding:0.9rem 2rem;border-radius:12px;background:linear-gradient(135deg,var(--purple),var(--purple-dark));color:#fff;font-weight:700;font-size:1rem;border:none;cursor:pointer;font-family:inherit;transition:all 0.3s}
-.waitlist-form button:hover{transform:translateY(-2px);box-shadow:0 6px 25px rgba(139,92,246,0.4)}
-.waitlist-note{font-size:0.8rem;color:var(--text-dim);margin-top:0.75rem}
+.wf{display:flex;gap:.75rem;margin-top:2rem;flex-wrap:wrap;justify-content:center;max-width:440px;margin-left:auto;margin-right:auto}
+.wf input{flex:1;min-width:220px;padding:.9rem 1.1rem;border-radius:12px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03);color:#f1f5f9;font-size:.9rem;outline:none;transition:all .3s}
+.wf input:focus{border-color:#7c3aed}
+.wf input::placeholder{color:#334155}
+.wf button{padding:.9rem 1.75rem;border-radius:12px;background:linear-gradient(135deg,#7c3aed,#4c1d95);color:#fff;font-weight:700;font-size:.9rem;border:none;transition:all .3s;box-shadow:0 4px 16px rgba(124,58,237,.3)}
+.wf button:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,58,237,.4)}
+.wn{font-size:.7rem;color:#334155;margin-top:1rem}
+#wok{display:none;color:#34d399;margin-top:1rem;font-weight:600}
 
 /* FOOTER */
-footer{padding:3rem 2rem;text-align:center;border-top:1px solid rgba(255,255,255,0.05)}
-footer p{color:var(--text-dim);font-size:0.85rem}
-footer a{color:var(--purple-light);text-decoration:none}
+footer{padding:3rem 2.5rem;border-top:1px solid rgba(255,255,255,.03)}
+.ft{max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.ftl{display:flex;align-items:center;gap:.5rem;font-weight:800;font-size:.9rem;letter-spacing:1px;text-transform:uppercase}
+.ftl svg{width:18px;height:18px}
+.fta{display:flex;gap:2rem}
+.fta a{color:#334155;text-decoration:none;font-size:.7rem;letter-spacing:1.5px;text-transform:uppercase;transition:color .3s}
+.fta a:hover{color:#94a3b8}
+.ftc{color:#334155;font-size:.7rem}
+.ftc a{color:#a78bfa;text-decoration:none}
 
-/* MOBILE */
-@media(max-width:768px){
+/* Reveal */
+.r{opacity:0;transform:translateY(40px)}
+
+/* Mobile */
+@media(max-width:960px){
+.hero{min-height:auto;padding:7rem 1.5rem 4rem}
 .hero-content{grid-template-columns:1fr;text-align:center;gap:3rem}
-.hero-text{align-items:center}
-.hero-desc{text-align:center}
+.hero-title .main{font-size:.7em}
+.hero-desc{margin:1.5rem auto 0}
+.hero-actions{justify-content:center}
 .hero-stats{justify-content:center}
-.nav-links{display:none}
-.phone-frame{width:240px;height:480px}
-.features-grid{grid-template-columns:1fr}
+.sg{grid-template-columns:1fr;gap:1.5rem}
+.sc:nth-child(2){margin-top:0}
+.fg{grid-template-columns:1fr}
+.philo{min-height:auto;padding:5rem 1.5rem}
+.cta{padding:5rem 1.5rem}
+.cg{padding:2.5rem 1.5rem}
+.ct-wrap{flex-direction:column;gap:1rem;padding:1.5rem}
+.ct-n{font-size:5rem}
+.ct-t{text-align:center}
+.nx{display:none}
+.ft{flex-direction:column;text-align:center}
+.sec{padding:6rem 1.5rem}
+.pf{width:240px;height:500px}
+.pg{width:300px;height:300px}
 }
-
-/* ANIMATIONS */
-.fade-in{opacity:0;transform:translateY(30px);transition:all 0.6s ease-out}
-.fade-in.visible{opacity:1;transform:translateY(0)}
 </style>
 </head>
 <body>
 
-<nav>
-<div class="nav-logo">
-<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M20 4L36 34H4L20 4Z" stroke="#8b5cf6" stroke-width="2.5" fill="none"/>
-<path d="M20 14L28 30H12L20 14Z" stroke="#a78bfa" stroke-width="1.5" fill="none" opacity="0.6"/>
-</svg>
+<div class="cur" id="c"></div>
+<div class="cur-ring" id="cr"></div>
+
+<nav id="nv">
+<div class="ni">
+<div class="nl">
+<svg viewBox="0 0 40 40" fill="none"><path d="M20 4L36 34H4L20 4Z" stroke="#a78bfa" stroke-width="2" fill="none"/><path d="M20 14L28 30H12L20 14Z" stroke="#7c3aed" stroke-width="1.5" fill="none" opacity="0.5"/></svg>
 AXIOM
 </div>
-<div class="nav-links">
+<div class="nx">
+<a href="#crisis">Crisis</a>
+<a href="#app">App</a>
 <a href="#features">Features</a>
-<a href="#download" class="nav-cta">Download Free</a>
+<a href="#download" class="nc">Download</a>
+</div>
 </div>
 </nav>
 
-<section class="hero">
+<section class="hero" id="hero">
 <div class="hero-bg"></div>
-<div class="hero-orb hero-orb-1"></div>
-<div class="hero-orb hero-orb-2"></div>
+<div class="hero-vig"></div>
 <div class="hero-content">
 <div class="hero-text">
-<div class="hero-badge"><span class="dot"></span> Free & Open</div>
-<h1>Your brain is <span>healing.</span></h1>
-<p class="hero-desc">Track dopamine recovery, build streaks, and feel alive. The crisis features are free — because they should be.</p>
+<div class="hero-badge"><span></span> Free & Open Source</div>
+<h1 class="hero-title"><span class="main">AXIOM</span><span class="sub">Dopamine Recovery</span></h1>
+<p class="hero-desc">The crisis features are <strong>free</strong>. No timer. No paywall. No ads. Because they should be.</p>
 <div class="hero-actions">
-<a href="https://play.google.com/store/apps/details?id=com.axiomapp.app" class="btn-primary" target="_blank">
-<svg width="20" height="22" viewBox="0 0 20 22" fill="currentColor"><path d="M1.571.955C1.213 1.19 1 1.596 1 2.056V19.944c0 .46.213.867.571 1.101l9.834-10.045L1.571.955zm.707-.707L13.112 10.5 10.6 13.012 2.278.248zM13.82 11.208l-2.815 2.815L2.278 21.752l10.834-7.729 2.513-2.513-1.805-1.302zm1.805-1.302L17.88 11l-2.255 1.094-1.805-1.302 1.805-1.302z"/></svg>
-Get on Google Play
+<a href="https://play.google.com/store/apps/details?id=com.axiomapp.app" class="btn btn-p" target="_blank">
+<svg width="18" height="20" viewBox="0 0 20 22" fill="currentColor"><path d="M1.571.955C1.213 1.19 1 1.596 1 2.056V19.944c0 .46.213.867.571 1.101l9.834-10.045L1.571.955zm.707-.707L13.112 10.5 10.6 13.012 2.278.248zM13.82 11.208l-2.815 2.815L2.278 21.752l10.834-7.729 2.513-2.513-1.805-1.302zm1.805-1.302L17.88 11l-2.255 1.094-1.805-1.302 1.805-1.302z"/></svg>
+Google Play
 </a>
-<a href="#waitlist" class="btn-secondary">
-🍎 iOS Waitlist
-</a>
+<a href="#waitlist" class="btn btn-s">iOS Waitlist</a>
 </div>
 <div class="hero-stats">
-<div class="stat"><span class="stat-num">4.8★</span><span class="stat-label">Rating</span></div>
-<div class="stat"><span class="stat-num">100%</span><span class="stat-label">Free Core</span></div>
-<div class="stat"><span class="stat-num">0</span><span class="stat-label">Ads</span></div>
+<div><div class="stat-n">4.8★</div><div class="stat-l">Rating</div></div>
+<div><div class="stat-n">100%</div><div class="stat-l">Free Core</div></div>
+<div><div class="stat-n">0</div><div class="stat-l">Ads</div></div>
 </div>
 </div>
-<div class="hero-visual">
-<div class="phone-glow"></div>
-<div class="phone-frame">
-<div class="phone-notch"></div>
-<img src="screenshot1.png" alt="AXIOM App Dashboard" class="phone-img">
+<div class="phone-wrap">
+<div class="pg"></div>
+<div class="phone-float">
+<div class="pf">
+<div class="pfi">
+<div class="pn"></div>
+<img src="screenshot1.png" alt="AXIOM">
+<div class="pr"></div>
 </div>
 </div>
-</div>
-</section>
-
-<section class="gallery" id="screenshots">
-<div class="gallery-inner">
-<div class="section-tag">Inside the App</div>
-<h2>Built for recovery. Designed to keep you going.</h2>
-<div class="gallery-scroll">
-<div class="gallery-item fade-in"><img src="screenshot1.png" alt="AXIOM Dashboard"></div>
-<div class="gallery-item fade-in"><img src="screenshot2.png" alt="AXIOM Brain Rewire Map"></div>
-<div class="gallery-item fade-in"><img src="screenshot3.png" alt="AXIOM Recovery Tools"></div>
-</div>
-</div>
-</section>
-
-<section class="problem">
-<div class="section-inner">
-<div class="section-tag">The Problem</div>
-<h2>Recovery apps shouldn't profit from your crisis.</h2>
-<div class="problem-card fade-in">
-<div class="problem-quote">"I was mid-crisis, shaking, reached for the app I'd been paying $12/month for — and the panic button had a timer."</div>
-<div class="problem-detail">We tested the top-rated recovery app on the Play Store. The panic button — the feature you need most during a crisis — made you wait before it would work.</div>
-<div class="problem-timer">
-<div class="timer-num">143s</div>
-<div><div class="timer-text"><strong>Seconds to wait</strong>Before the panic button activates. During a crisis.</div></div>
 </div>
 </div>
 </div>
 </section>
 
-<section class="features" id="features">
-<div class="features-inner">
-<div style="text-align:center">
-<div class="section-tag">Features</div>
-<h2>Everything you need. Nothing locked.</h2>
+<div class="tbar"></div>
+
+<section class="sec crisis" id="crisis">
+<div class="si" style="text-align:center">
+<div class="sl r">The Crisis</div>
+<h2 class="st r" style="margin-bottom:4rem">Recovery apps shouldn't profit from your crisis.</h2>
+<div class="cq r">I was mid-crisis, shaking, reached for the app I'd been paying $12/month for — and the panic button had a timer.</div>
+<div class="ct-wrap r">
+<div class="ct-n" id="tn">0</div>
+<div class="ct-t"><strong>Seconds to wait</strong>Before the panic button activates. During a crisis.</div>
 </div>
-<div class="features-grid">
-<div class="feature-card fade-in">
-<div class="feature-icon fi-panic">🛑</div>
-<h3>Instant Panic Button</h3>
-<p>No timer. No paywall. No "watch an ad first." One tap, instant help — exactly when you need it.</p>
-<span class="feature-tag tag-instant">INSTANT</span>
 </div>
-<div class="feature-card fade-in">
-<div class="feature-icon fi-mood">📊</div>
-<h3>Mood Tracking</h3>
-<p>See your emotional patterns over time. Spot triggers before they hit. Your data stays on your device.</p>
-<span class="feature-tag tag-free">FREE</span>
+</section>
+
+<div class="tbar"></div>
+
+<section class="sec showcase" id="app">
+<div class="si" style="text-align:center">
+<div class="sl r">Inside the App</div>
+<h2 class="st r">Built for recovery.</h2>
+<div class="sg">
+<div class="sc r">
+<div class="sci glass">
+<img src="screenshot1.png" alt="Dashboard">
+<div class="scl">Dashboard</div>
 </div>
-<div class="feature-card fade-in">
-<div class="feature-icon fi-journal">📝</div>
-<h3>Journaling</h3>
-<p>Process what you're feeling in the moment. No prompts, no structure — just space to be honest with yourself.</p>
-<span class="feature-tag tag-free">FREE</span>
 </div>
-<div class="feature-card fade-in">
-<div class="feature-icon fi-streak">🔥</div>
-<h3>Streak Tracking</h3>
-<p>Watch the number grow. See how far you've come. Every day counts and every day is visible.</p>
-<span class="feature-tag tag-free">FREE</span>
+<div class="sc r">
+<div class="sci glass">
+<img src="screenshot2.png" alt="Brain Rewire">
+<div class="scl">Brain Rewire</div>
 </div>
-<div class="feature-card fade-in">
-<div class="feature-icon fi-offline">📡</div>
-<h3>Works Offline</h3>
-<p>No internet? No problem. Everything works locally. No account required. Your data never leaves your phone.</p>
-<span class="feature-tag tag-free">FREE</span>
 </div>
-<div class="feature-card fade-in">
-<div class="feature-icon fi-free">💜</div>
-<h3>Actually Free</h3>
-<p>Not "free trial" free. Not "watch ads" free. The features you need during a crisis are free. Period.</p>
-<span class="feature-tag tag-free">FREE FOREVER</span>
+<div class="sc r">
+<div class="sci glass">
+<img src="screenshot1.png" alt="Recovery Tools">
+<div class="scl">Recovery Tools</div>
+</div>
 </div>
 </div>
 </div>
 </section>
 
-<section class="cta" id="download">
-<div class="cta-bg"></div>
-<div class="cta-inner fade-in">
-<div class="section-tag">Download</div>
-<h2>Start your recovery today.</h2>
-<p>Free on Android. No account needed. No data collected. Just you and your progress.</p>
-<div class="cta-buttons">
-<a href="https://play.google.com/store/apps/details?id=com.axiomapp.app" class="btn-primary" target="_blank">
-<svg width="20" height="22" viewBox="0 0 20 22" fill="currentColor"><path d="M1.571.955C1.213 1.19 1 1.596 1 2.056V19.944c0 .46.213.867.571 1.101l9.834-10.045L1.571.955zm.707-.707L13.112 10.5 10.6 13.012 2.278.248zM13.82 11.208l-2.815 2.815L2.278 21.752l10.834-7.729 2.513-2.513-1.805-1.302zm1.805-1.302L17.88 11l-2.255 1.094-1.805-1.302 1.805-1.302z"/></svg>
-Get on Google Play
+<div class="tbar"></div>
+
+<section class="sec features" id="features">
+<div class="si" style="text-align:center">
+<div class="sl r">Features</div>
+<h2 class="st r">Nothing locked.</h2>
+<div class="fg">
+<div class="fc glass r">
+<div class="fi f1">🛑</div>
+<div><h3>Instant Panic Button</h3><p>No timer. No paywall. One tap, instant help.</p><span class="ftg" style="background:rgba(251,113,133,.12);color:#fb7185">INSTANT</span></div>
+</div>
+<div class="fc glass r">
+<div class="fi f2">📊</div>
+<div><h3>Mood Tracking</h3><p>See your emotional patterns. Spot triggers before they hit.</p><span class="ftg" style="background:rgba(59,130,246,.12);color:#60a5fa">FREE</span></div>
+</div>
+<div class="fc glass r">
+<div class="fi f3">📝</div>
+<div><h3>Journaling</h3><p>Process what you're feeling. No prompts, no structure.</p><span class="ftg" style="background:rgba(52,211,153,.12);color:#34d399">FREE</span></div>
+</div>
+<div class="fc glass r">
+<div class="fi f4">🔥</div>
+<div><h3>Streak Tracking</h3><p>Watch the number grow. Every day counts.</p><span class="ftg" style="background:rgba(245,158,11,.12);color:#fbbf24">FREE</span></div>
+</div>
+<div class="fc glass r">
+<div class="fi f5">📡</div>
+<div><h3>Works Offline</h3><p>No internet? No problem. No account required.</p><span class="ftg" style="background:rgba(124,58,237,.12);color:#a78bfa">FREE</span></div>
+</div>
+<div class="fc glass r">
+<div class="fi f6">💜</div>
+<div><h3>Actually Free</h3><p>Not "free trial" free. Crisis features are free. Period.</p><span class="ftg" style="background:rgba(236,72,153,.12);color:#f472b6">FOREVER</span></div>
+</div>
+</div>
+</div>
+</section>
+
+<div class="tbar"></div>
+
+<section class="philo" id="philosophy">
+<div class="si">
+<div class="pt r">
+<span class="l">Free forever.</span>
+<span class="l a">No paywalls.</span>
+<span class="l">No timers.</span>
+</div>
+<p class="pd r">We believe the moment you need help most shouldn't be gated by a subscription. Crisis tools are a right, not a premium feature.</p>
+</div>
+</section>
+
+<div class="tbar"></div>
+
+<section class="sec cta" id="download">
+<div class="cg glass-strong">
+<div class="sl r">Start Today</div>
+<h2 class="st r" style="margin-bottom:.5rem">Your recovery starts now.</h2>
+<p class="r">Free on Android. No account. No data collection. iOS coming soon.</p>
+<div class="r" style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:2rem">
+<a href="https://play.google.com/store/apps/details?id=com.axiomapp.app" class="btn btn-p" target="_blank">
+<svg width="18" height="20" viewBox="0 0 20 22" fill="currentColor"><path d="M1.571.955C1.213 1.19 1 1.596 1 2.056V19.944c0 .46.213.867.571 1.101l9.834-10.045L1.571.955zm.707-.707L13.112 10.5 10.6 13.012 2.278.248zM13.82 11.208l-2.815 2.815L2.278 21.752l10.834-7.729 2.513-2.513-1.805-1.302zm1.805-1.302L17.88 11l-2.255 1.094-1.805-1.302 1.805-1.302z"/></svg>
+Google Play
 </a>
+<a href="#waitlist" class="btn btn-s">iOS Waitlist</a>
 </div>
 </div>
 </section>
 
-<section class="waitlist" id="waitlist">
-<div class="waitlist-inner fade-in">
-<div class="section-tag">Coming Soon</div>
-<h2>iOS is on the way. 🍎</h2>
-<p style="color:var(--text-muted);margin-top:0.5rem">Drop your email and we'll let you know the second it's live.</p>
-<form class="waitlist-form" onsubmit="handleWaitlist(event)">
+<section class="sec" id="waitlist" style="padding-top:0">
+<div class="si" style="text-align:center;max-width:500px">
+<div class="sl r">Coming Soon</div>
+<h2 class="st r">iOS is on the way.</h2>
+<p class="r" style="color:#64748b;margin-top:.5rem">Drop your email. One email when it drops.</p>
+<form class="wf r" onsubmit="hw(event)">
 <input type="email" placeholder="your@email.com" required>
 <button type="submit">Join Waitlist</button>
 </form>
-<p class="waitlist-note">No spam. Just one email when iOS drops.</p>
-<p id="waitlist-success" style="display:none;color:#10b981;margin-top:1rem;font-weight:600">✓ You're on the list! We'll email you when iOS is ready.</p>
+<p class="wn r">No spam.</p>
+<p id="wok">You're on the list.</p>
 </div>
 </section>
 
 <footer>
-<p>Built with 💜 by <a href="https://github.com/LunaMazeStudio" target="_blank">Luna Maze Studio</a> &middot; 2026</p>
+<div class="ft">
+<div class="ftl">
+<svg viewBox="0 0 40 40" fill="none"><path d="M20 4L36 34H4L20 4Z" stroke="#a78bfa" stroke-width="2" fill="none"/><path d="M20 14L28 30H12L20 14Z" stroke="#7c3aed" stroke-width="1.5" fill="none" opacity="0.5"/></svg>
+AXIOM
+</div>
+<div class="fta">
+<a href="#crisis">Crisis</a>
+<a href="#app">App</a>
+<a href="#features">Features</a>
+<a href="#download">Download</a>
+</div>
+<div class="ftc">Built by <a href="https://github.com/LunaMazeStudio" target="_blank">Luna Maze Studio</a> · 2026</div>
+</div>
 </footer>
 
 <script>
-// Scroll animations
-const observer = new IntersectionObserver((entries) => {
-entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible') });
-}, {threshold: 0.1});
-document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+gsap.registerPlugin(ScrollTrigger);
 
-// Waitlist form
-function handleWaitlist(e) {
-e.preventDefault();
-const email = e.target.querySelector('input').value;
-// Store in localStorage for now (replace with real backend later)
-const list = JSON.parse(localStorage.getItem('axiom-waitlist') || '[]');
-list.push({email, date: new Date().toISOString()});
-localStorage.setItem('axiom-waitlist', JSON.stringify(list));
-e.target.style.display = 'none';
-document.getElementById('waitlist-success').style.display = 'block';
-}
-
-// Smooth nav background
-window.addEventListener('scroll', () => {
-const nav = document.querySelector('nav');
-nav.style.background = window.scrollY > 50 ? 'rgba(10,10,15,0.95)' : 'rgba(10,10,15,0.8)';
+// Cursor
+const c=document.getElementById('c'),cr=document.getElementById('cr');
+let mx=0,my=0,tx=0,ty=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
+document.querySelectorAll('a,button,input,.sc,.fc,.btn').forEach(el=>{
+ el.addEventListener('mouseenter',()=>c.classList.add('hov'));
+ el.addEventListener('mouseleave',()=>c.classList.remove('hov'));
 });
+function ac(){tx+=(mx-tx)*.14;ty+=(my-ty)*.14;c.style.left=mx+'px';c.style.top=my+'px';cr.style.left=tx+'px';cr.style.top=ty+'px';requestAnimationFrame(ac)}
+ac();
+
+// Nav
+const nv=document.getElementById('nv');
+window.addEventListener('scroll',()=>{
+ nv.classList.toggle('on',window.scrollY>80);
+});
+
+// Reveals
+gsap.utils.toArray('.r').forEach((el,i)=>{
+ gsap.to(el,{opacity:1,y:0,duration:.9,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 88%'},delay:i*.03});
+});
+
+// Hero parallax
+gsap.to('.hero-title',{y:-60,scrollTrigger:{trigger:'.hero',start:'top top',end:'bottom top',scrub:1}});
+gsap.to('.phone-float',{y:-30,scrollTrigger:{trigger:'.hero',start:'top top',end:'bottom top',scrub:1}});
+
+// Timer
+gsap.to('#tn',{innerText:143,duration:2.5,ease:'power2.out',snap:{innerText:1},scrollTrigger:{trigger:'.ct-wrap',start:'top 80%'}});
+
+// Showcase
+gsap.utils.toArray('.sc').forEach((el,i)=>{
+ gsap.fromTo(el,{y:60,opacity:0},{y:0,opacity:1,duration:1.1,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 85%'},delay:i*.12});
+});
+
+// Features
+gsap.utils.toArray('.fc').forEach((el,i)=>{
+ gsap.fromTo(el,{y:50,opacity:0},{y:0,opacity:1,duration:.85,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 88%'},delay:i*.06});
+});
+
+// Philosophy
+gsap.utils.toArray('.pt .l').forEach((line,i)=>{
+ gsap.fromTo(line,{y:50,opacity:0},{y:0,opacity:1,duration:1.1,ease:'power3.out',scrollTrigger:{trigger:'.philo',start:'top 65%'},delay:i*.2});
+});
+
+// Waitlist
+function hw(e){
+ e.preventDefault();
+ const email=e.target.querySelector('input').value;
+ const list=JSON.parse(localStorage.getItem('axiom-waitlist')||'[]');
+ list.push({email,date:new Date().toISOString()});
+ localStorage.setItem('axiom-waitlist',JSON.stringify(list));
+ e.target.style.display='none';
+ document.getElementById('wok').style.display='block';
+}
 </script>
 </body>
 </html>
