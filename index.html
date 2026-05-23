@@ -10,11 +10,11 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="AXIOM — Dopamine Recovery">
 <meta property="og:description" content="Track dopamine recovery, build streaks, and feel alive. Crisis tools and core features are 100% free with no timers or ads.">
-<meta property="og:image" content="https://shadowline-trx.github.io/axiom/playstore_dashboard.png">
+<meta property="og:image" content="https://shadowline-trx.github.io/axiom/raw_dashboard.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="AXIOM — Dopamine Recovery">
 <meta name="twitter:description" content="Track dopamine recovery, build streaks, and feel alive. Crisis tools and core features are 100% free with no timers or ads.">
-<meta name="twitter:image" content="https://shadowline-trx.github.io/axiom/playstore_dashboard.png">
+<meta name="twitter:image" content="https://shadowline-trx.github.io/axiom/raw_dashboard.jpg">
 <meta name="theme-color" content="#020204">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M20 4L36 34H4L20 4Z' fill='none' stroke='%23a78bfa' stroke-width='3'/%3E%3Cpath d='M20 14L28 30H12L20 14Z' fill='none' stroke='%237c3aed' stroke-width='2' opacity='0.6'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -98,15 +98,19 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.5rem 2.5rem;transi
 .stat-num{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;font-weight:400;line-height:1;letter-spacing:.02em;background:linear-gradient(180deg,#f8fafc,#64748b);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
 .stat-label{font-size:.65rem;color:#64748b;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin-top:.4rem}
 
-/* CINEMATIC HERO POSTER CARD */
-.hero-visual-wrap{display:flex;justify-content:center;align-items:center;position:relative;perspective:1500px;transform-style:preserve-3d}
-.hero-visual-3d{transform-style:preserve-3d;animation:posterFloat 7.5s ease-in-out infinite}
-@keyframes posterFloat{0%,100%{transform:translateY(0) rotateY(-11deg) rotateX(3.5deg)}50%{transform:translateY(-16px) rotateY(-6deg) rotateX(1.5deg)}}
-.hero-visual-glow{position:absolute;width:380px;height:550px;background:radial-gradient(circle,rgba(124,58,237,.24),transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%);filter:blur(50px);z-index:-1;animation:glowPulse 4.5s ease-in-out infinite}
+/* PREMIUM METALLIC PHONE MOCKUP SYSTEM */
+.phone-wrap{display:flex;justify-content:center;align-items:center;position:relative;perspective:1500px;transform-style:preserve-3d;margin:0 auto}
+.phone-3d{transform-style:preserve-3d;animation:phoneFloat 7.5s ease-in-out infinite}
+@keyframes phoneFloat{0%,100%{transform:translateY(0) rotateY(-8deg) rotateX(3deg)}50%{transform:translateY(-14px) rotateY(-4deg) rotateX(1.5deg)}}
+.phone-glow{position:absolute;width:340px;height:480px;background:radial-gradient(circle,rgba(124,58,237,.25),transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%);filter:blur(50px);z-index:-1;animation:glowPulse 4.5s ease-in-out infinite}
 @keyframes glowPulse{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:.9;transform:translate(-50%,-50%) scale(1.15)}}
-.hero-visual-card{width:290px;aspect-ratio:1/2;border-radius:24px;padding:1.5px;background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.02) 60%,rgba(255,255,255,.01));position:relative;box-shadow:0 40px 100px rgba(0,0,0,.65),0 0 80px rgba(124,58,237,.18),inset 0 1px 2px rgba(255,255,255,.1);overflow:hidden}
-.hero-visual-img{width:100%;height:100%;object-fit:contain;border-radius:22px;display:block;background:#030305}
-.hero-visual-refl{position:absolute;inset:0;border-radius:22px;background:linear-gradient(135deg,rgba(255,255,255,.07) 0%,transparent 35%,transparent 65%,rgba(255,255,255,.02) 100%);pointer-events:none;z-index:3}
+
+.phone-frame{width:275px;height:575px;border-radius:40px;padding:6px;background:linear-gradient(180deg,#343442,#1c1c22 40%,#0c0c0e 100%);position:relative;box-shadow:0 30px 80px rgba(0,0,0,.7),0 0 45px rgba(124,58,237,.16),inset 0 1px 2px rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.05);transform-style:preserve-3d}
+.phone-frame::before{content:'';position:absolute;inset:0;border-radius:40px;background:linear-gradient(180deg,rgba(255,255,255,.12),transparent 50%,transparent 75%,rgba(255,255,255,.03));pointer-events:none;z-index:3}
+.phone-inner{width:100%;height:100%;background:#020204;border-radius:34px;overflow:hidden;position:relative;border:1px solid rgba(0,0,0,.95)}
+.phone-notch{position:absolute;top:4px;left:50%;transform:translateX(-50%);width:92px;height:24px;background:#020204;border-radius:100px;z-index:4;border:1.5px solid rgba(255,255,255,.04)}
+.phone-img{width:100%;height:100%;object-fit:cover;display:block;border-radius:34px}
+.phone-refl{position:absolute;inset:0;border-radius:34px;background:linear-gradient(135deg,rgba(255,255,255,.09) 0%,transparent 35%,transparent 65%,rgba(255,255,255,.02) 100%);pointer-events:none;z-index:5}
 
 /* SECTIONS COMMON */
 .section{position:relative;padding:9rem 2.5rem}
@@ -133,13 +137,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1.5rem 2.5rem;transi
 .showcase-sec{background:#020204;position:relative}
 .showcase-sec::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(124,58,237,.05),transparent 60%);pointer-events:none}
 .showcase-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2.2rem;margin-top:4.5rem;align-items:start}
-.sc-item{position:relative;border-radius:24px;padding:1.5px;background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.02) 60%,rgba(255,255,255,.01));transition:all .6s cubic-bezier(.16,1,.3,1);transform-style:preserve-3d;box-shadow:0 24px 60px rgba(0,0,0,.45);aspect-ratio:1/2}
+
+.sc-item{position:relative;transition:all .6s cubic-bezier(.16,1,.3,1);transform-style:preserve-3d;display:flex;flex-direction:column;align-items:center}
 .sc-item:nth-child(2){margin-top:4rem}
-.sc-item:hover{transform:translateY(-16px) scale(1.02);box-shadow:0 40px 90px rgba(0,0,0,.55),0 0 60px rgba(124,58,237,.14)}
-.sc-inner{border-radius:22px;overflow:hidden;position:relative;background:#0a0a0f;height:100%;width:100%}
-.sc-inner img{width:100%;height:100%;object-fit:contain;display:block;transition:transform .8s cubic-bezier(.16,1,.3,1);background:#0a0a0f}
-.sc-item:hover .sc-inner img{transform:scale(1.05)}
-.sc-label{position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);padding:.55rem 1.4rem;border-radius:100px;font-size:.75rem;font-weight:700;letter-spacing:.5px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);background:rgba(8,8,12,.8);border:1px solid rgba(255,255,255,.08);color:#f8fafc;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.sc-item:hover{transform:translateY(-12px) scale(1.03)}
+.sc-item:hover .phone-glow{opacity:1;transform:translate(-50%,-50%) scale(1.2);filter:blur(40px)}
+.sc-label{margin-top:1.5rem;padding:.55rem 1.4rem;border-radius:100px;font-size:.75rem;font-weight:700;letter-spacing:.5px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);background:rgba(8,8,12,.8);border:1px solid rgba(255,255,255,.08);color:#f8fafc;box-shadow:0 8px 24px rgba(0,0,0,.35)}
 
 /* BENTO FEATURES */
 .bento-sec{background:#08080d;position:relative}
@@ -209,10 +212,15 @@ footer{padding:4.5rem 2.5rem 3rem;border-top:1px solid rgba(255,255,255,.03);pos
 .hero-text{display:flex;flex-direction:column;align-items:center}
 .hero-desc{text-align:center;margin:1.8rem auto 0}
 .hero-stats{justify-content:center;gap:3rem}
-.hero-visual-card{width:280px;height:auto}
-.showcase-grid{grid-template-columns:1fr;gap:2.5rem;max-width:320px;margin:3.5rem auto 0}
+
+.phone-frame{width:245px;height:512px;border-radius:36px;padding:5px}
+.phone-inner{border-radius:30px}
+.phone-img{border-radius:30px}
+.phone-refl{border-radius:30px}
+.phone-notch{width:80px;height:18px}
+
+.showcase-grid{grid-template-columns:1fr;gap:3.5rem;max-width:320px;margin:3.5rem auto 0}
 .sc-item:nth-child(2){margin-top:0}
-.sc-inner{height:100%;width:100%}
 .bento-grid{grid-template-columns:1fr;gap:1.25rem}
 .bento-wide{grid-column:span 1}
 .bento-tall{grid-row:span 1;min-height:250px}
@@ -279,13 +287,18 @@ Get on Google Play
 </div>
 </div>
 <div class="hero-visual-wrap">
-<div class="hero-visual-glow"></div>
-<div class="hero-visual-3d">
-<div class="hero-visual-card">
-<img src="playstore_dashboard.png" alt="AXIOM Dashboard Banner" class="hero-visual-img">
-<div class="hero-visual-refl"></div>
-</div>
-</div>
+  <div class="phone-wrap">
+    <div class="phone-glow"></div>
+    <div class="phone-3d">
+      <div class="phone-frame">
+        <div class="phone-inner">
+          <div class="phone-notch"></div>
+          <img src="raw_dashboard.jpg" alt="AXIOM Dashboard" class="phone-img">
+          <div class="phone-refl"></div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 </div>
 </section>
@@ -310,24 +323,51 @@ Get on Google Play
 <div class="sec-label reveal">Inside the App</div>
 <h2 class="sec-title reveal">Built for recovery. Styled for clarity.</h2>
 <div class="showcase-grid">
-<div class="sc-item reveal">
-<div class="sc-inner lg">
-<img src="playstore_dashboard.png" alt="AXIOM Dashboard">
-<div class="sc-label">Dashboard</div>
-</div>
-</div>
-<div class="sc-item reveal">
-<div class="sc-inner lg">
-<img src="playstore_rewire.png" alt="AXIOM Brain Rewire">
-<div class="sc-label">Brain Rewire</div>
-</div>
-</div>
-<div class="sc-item reveal">
-<div class="sc-inner lg">
-<img src="playstore_tools.png" alt="AXIOM Recovery Tools">
-<div class="sc-label">Recovery Tools</div>
-</div>
-</div>
+  <div class="sc-item reveal">
+    <div class="phone-wrap">
+      <div class="phone-glow"></div>
+      <div class="phone-3d">
+        <div class="phone-frame">
+          <div class="phone-inner">
+            <div class="phone-notch"></div>
+            <img src="raw_dashboard.jpg" alt="AXIOM Dashboard" class="phone-img">
+            <div class="phone-refl"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sc-label">Dashboard</div>
+  </div>
+  <div class="sc-item reveal">
+    <div class="phone-wrap">
+      <div class="phone-glow"></div>
+      <div class="phone-3d">
+        <div class="phone-frame">
+          <div class="phone-inner">
+            <div class="phone-notch"></div>
+            <img src="raw_rewire.jpg" alt="AXIOM Brain Rewire" class="phone-img">
+            <div class="phone-refl"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sc-label">Brain Rewire</div>
+  </div>
+  <div class="sc-item reveal">
+    <div class="phone-wrap">
+      <div class="phone-glow"></div>
+      <div class="phone-3d">
+        <div class="phone-frame">
+          <div class="phone-inner">
+            <div class="phone-notch"></div>
+            <img src="raw_tools.jpg" alt="AXIOM Recovery Tools" class="phone-img">
+            <div class="phone-refl"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sc-label">Recovery Tools</div>
+  </div>
 </div>
 </div>
 </section>
@@ -449,7 +489,7 @@ gsap.utils.toArray('.reveal').forEach((el,i)=>{
 
 // Hero interactive parallax
 gsap.to('.hero-title',{y:-80,scrollTrigger:{trigger:'.hero',start:'top top',end:'bottom top',scrub:1.2}});
-gsap.to('.hero-visual-3d',{y:-40,scrollTrigger:{trigger:'.hero',start:'top top',end:'bottom top',scrub:1}});
+gsap.to('.hero-visual-wrap .phone-3d',{y:-40,scrollTrigger:{trigger:'.hero',start:'top top',end:'bottom top',scrub:1}});
 gsap.to('.mesh-bg',{y:-30,scrollTrigger:{trigger:'.hero',start:'top top',end:'bottom top',scrub:.8}});
 
 // Crisis counter animation
