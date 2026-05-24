@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AXIOM — Analytics Vault</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath d='M20 4L36 34H4L20 4Z' fill='none' stroke='%23a78bfa' stroke-width='3'/%3E%3Cpath d='M20 14L28 30H12L20 14Z' fill='none' stroke='%237c3aed' stroke-width='2' opacity='0.6'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Bebas+Neue&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:#020204;color:#f8fafc;overflow-x:hidden;min-height:100vh;line-height:1.6;-webkit-font-smoothing:antialiased}
+
+/* FILM GRAIN OVERLAY */
+.grain{position:fixed;inset:0;z-index:9990;pointer-events:none;opacity:.022;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:140px}
+
+/* DYNAMIC MESH BACKGROUND */
+.mesh-bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.mesh-bg::before{content:'';position:absolute;inset:-40%;background:radial-gradient(ellipse 65% 55% at 20% 35%,rgba(124,58,237,.14),transparent 60%),radial-gradient(ellipse 55% 65% at 80% 25%,rgba(16,185,129,.05),transparent 55%),radial-gradient(ellipse 70% 45% at 50% 80%,rgba(124,58,237,.09),transparent 55%);animation:meshDrift 25s ease-in-out infinite alternate}
+@keyframes meshDrift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(-2%,1.5%) scale(1.02)}100%{transform:translate(1.5%,-1%) scale(1)}}
+
+/* LIQUID GLASS SYSTEM */
+.lg{position:relative;background:rgba(255,255,255,.022);backdrop-filter:blur(30px) saturate(160%);-webkit-backdrop-filter:blur(30px) saturate(160%);border:1px solid rgba(255,255,255,.05);box-shadow:inset 0 1px 1px rgba(255,255,255,.04),0 16px 40px rgba(0,0,0,.45)}
+.lg::before{content:'';position:absolute;inset:0;border-radius:inherit;padding:1px;background:linear-gradient(175deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,.03) 30%,transparent 50%,transparent 70%,rgba(255,255,255,.02) 100%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude;pointer-events:none;opacity:.8}
+
+/* UNLOCK SCREEN */
+#vault-lock{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:2rem}
+.lock-card{width:100%;max-width:440px;padding:3.5rem 2.5rem;border-radius:28px;text-align:center;position:relative}
+.lock-logo{display:flex;align-items:center;justify-content:center;gap:.6rem;font-weight:800;font-size:1.4rem;letter-spacing:1px;text-transform:uppercase;margin-bottom:2rem}
+.lock-logo svg{width:36px;height:36px}
+.lock-title{font-family:'Bebas Neue',sans-serif;font-size:3.2rem;letter-spacing:1px;margin-bottom:.5rem;background:linear-gradient(180deg,#f8fafc,#94a3b8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.lock-desc{font-size:.85rem;color:#64748b;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin-bottom:2.5rem}
+
+.pass-group{position:relative;margin-bottom:1.5rem}
+.pass-input{width:100%;padding:1.1rem 1.5rem;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:#f8fafc;font-size:1.1rem;font-family:'Share Tech Mono',monospace;text-align:center;letter-spacing:4px;outline:none;transition:all .3s}
+.pass-input:focus{border-color:#8b5cf6;box-shadow:0 0 30px rgba(124,58,237,.15);background:rgba(255,255,255,.06)}
+.pass-input::placeholder{letter-spacing:normal;font-family:'Inter',sans-serif;font-size:.9rem;color:#475569}
+
+.unlock-btn{width:100%;padding:1.1rem;border-radius:14px;background:linear-gradient(135deg,#7c3aed,#4c1d95);color:#fff;font-weight:700;font-size:.95rem;text-transform:uppercase;letter-spacing:1.5px;border:none;cursor:pointer;transition:all .35s;box-shadow:0 4px 20px rgba(124,58,237,.3)}
+.unlock-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(124,58,237,.45)}
+.unlock-btn:active{transform:translateY(0)}
+
+.err-msg{color:#f43f5e;font-size:.85rem;margin-top:.75rem;opacity:0;transition:opacity .3s;font-weight:500;letter-spacing:.5px}
+
+/* MAIN DASHBOARD */
+#vault-dashboard{display:none;position:relative;z-index:10;max-width:1300px;margin:0 auto;padding:4rem 2rem 6rem;opacity:0}
+
+/* HEADER */
+.dash-header{display:flex;justify-content:between;align-items:center;margin-bottom:3.5rem;flex-wrap:wrap;gap:1.5rem}
+.dash-title-wrap{display:flex;align-items:center;gap:1.2rem}
+.dash-logo-icon{width:46px;height:46px;background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.25);border-radius:12px;display:flex;align-items:center;justify-content:center}
+.dash-logo-icon svg{width:26px;height:26px}
+.dash-meta{display:flex;flex-direction:column}
+.dash-meta h1{font-family:'Bebas Neue',sans-serif;font-size:2.6rem;line-height:1;letter-spacing:1px;font-weight:400}
+.dash-badge{display:inline-flex;align-items:center;gap:.4rem;font-size:.7rem;font-weight:700;color:#34d399;text-transform:uppercase;letter-spacing:1px;margin-top:.3rem}
+.dash-badge .pulsing-dot{width:6px;height:6px;background:#34d399;border-radius:50%;animation:badgePulse 2s infinite}
+@keyframes badgePulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(52,211,153,.4)}50%{opacity:.3;box-shadow:0 0 0 6px rgba(52,211,153,0)}}
+
+.dash-actions{display:flex;align-items:center;gap:1rem}
+.sec-btn{padding:.75rem 1.5rem;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);color:#94a3b8;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .3s;text-decoration:none}
+.sec-btn:hover{background:rgba(255,255,255,.06);color:#f8fafc;border-color:rgba(124,58,237,.25)}
+.logout-btn{color:#f43f5e;border-color:rgba(244,63,94,.15)}
+.logout-btn:hover{background:rgba(244,63,94,.05);color:#ff859b;border-color:rgba(244,63,94,.3)}
+
+/* GRID */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-bottom:2.5rem}
+.metric-card{padding:2.2rem 1.8rem;border-radius:24px;display:flex;flex-direction:column;justify-content:space-between;min-height:180px;position:relative;overflow:hidden}
+.m-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-bottom:1.5rem}
+.m-vis{background:rgba(167,139,250,.1);color:#a78bfa}
+.m-play{background:rgba(52,211,153,.1);color:#34d399}
+.m-ios{background:rgba(96,165,250,.1);color:#60a5fa}
+.m-mail{background:rgba(244,114,182,.1);color:#f472b6}
+
+.m-data{display:flex;flex-direction:column}
+.m-num{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;line-height:.95;background:linear-gradient(180deg,#f8fafc,#cbd5e1);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.m-label{font-size:.7rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1.5px;margin-top:.4rem;display:flex;align-items:center;justify-content:space-between}
+.m-conv{font-family:'Share Tech Mono',monospace;font-size:.78rem;color:#34d399;font-weight:400;text-transform:none;letter-spacing:0}
+
+/* CHARTS PANEL */
+.layout-row{display:grid;grid-template-columns:1.6fr 1fr;gap:2rem;margin-bottom:2.5rem}
+.panel{padding:2.5rem;border-radius:28px;height:fit-content}
+.panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem}
+.panel-head h2{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;font-weight:400;letter-spacing:1px;display:flex;align-items:center;gap:.6rem}
+.panel-head h2::before{content:'';display:inline-block;width:12px;height:12px;background:#8b5cf6;border-radius:3px}
+
+/* LIST COMPONENT */
+.list-wrapper{max-height:360px;overflow-y:auto;padding-right:.5rem}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.05);border-radius:100px}
+::-webkit-scrollbar-thumb:hover{background:rgba(124,58,237,.3)}
+
+.list-item{display:flex;justify-content:space-between;align-items:center;padding:1rem 1.25rem;border-radius:12px;background:rgba(255,255,255,.015);border:1px solid rgba(255,255,255,.03);margin-bottom:.6rem;transition:all .3s}
+.list-item:hover{background:rgba(255,255,255,.035);border-color:rgba(124,58,237,.15);transform:translateX(4px)}
+.item-email{font-size:.9rem;font-weight:500;color:#e2e8f0;word-break:break-all}
+.item-date{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:#64748b}
+
+.empty-state{text-align:center;padding:3rem 1.5rem;color:#475569;font-size:.9rem;font-weight:500}
+
+/* CONVERSION DISPLAY */
+.conv-container{display:flex;flex-direction:column;gap:1.5rem}
+.conv-bar-wrap{display:flex;flex-direction:column;gap:.5rem}
+.conv-bar-info{display:flex;justify-content:space-between;font-size:.8rem;font-weight:600;color:#94a3b8}
+.conv-bar-outer{width:100%;height:10px;background:rgba(255,255,255,.02);border-radius:100px;overflow:hidden;border:1px solid rgba(255,255,255,.05)}
+.conv-bar-inner{height:100%;border-radius:100px;width:0%;transition:width 1.2s cubic-bezier(.16,1,.3,1)}
+.bg-play{background:linear-gradient(90deg,#10b981,#34d399);box-shadow:0 0 10px rgba(52,211,153,.3)}
+.bg-ios{background:linear-gradient(90deg,#3b82f6,#60a5fa);box-shadow:0 0 10px rgba(96,165,250,.3)}
+.bg-mail{background:linear-gradient(90deg,#ec4899,#f472b6);box-shadow:0 0 10px rgba(244,114,182,.3)}
+
+/* SANDBOX PANEL */
+.sandbox-panel{padding:2rem;border-radius:28px;background:rgba(124,58,237,.02);border:1px solid rgba(124,58,237,.08)}
+.sandbox-head{display:flex;align-items:center;gap:.6rem;margin-bottom:1.5rem;font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:#a78bfa;font-weight:400}
+.sandbox-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+.sandbox-control{display:flex;flex-direction:column;gap:.4rem}
+.sandbox-control label{font-size:.68rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.sandbox-control input{padding:.75rem 1rem;border-radius:10px;border:1px solid rgba(255,255,255,.06);background:rgba(255,255,255,.03);color:#f8fafc;font-family:'Share Tech Mono',monospace;font-size:.9rem;outline:none;transition:all .3s}
+.sandbox-control input:focus{border-color:rgba(124,58,237,.4);background:rgba(255,255,255,.05)}
+.sandbox-btns{display:flex;gap:1rem;flex-wrap:wrap}
+
+/* RESPONSIVE */
+@media(max-width:960px){
+.metrics-grid{grid-template-columns:repeat(2,1fr)}
+.layout-row{grid-template-columns:1fr;gap:2rem}
+.dash-header{justify-content:center;text-align:center;flex-direction:column}
+.dash-title-wrap{flex-direction:column}
+}
+@media(max-width:580px){
+.metrics-grid{grid-template-columns:1fr}
+.sandbox-grid{grid-template-columns:repeat(2,1fr)}
+.lock-card{padding:2.5rem 1.5rem}
+.panel{padding:1.5rem}
+}
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="mesh-bg"></div>
+
+<!-- VAULT PASSWORD GATE -->
+<section id="vault-lock">
+  <div class="lock-card lg">
+    <div class="lock-logo">
+      <svg viewBox="0 0 40 40" fill="none"><path d="M20 4L36 34H4L20 4Z" stroke="#a78bfa" stroke-width="2.5" fill="none"/><path d="M20 14L28 30H12L20 14Z" stroke="#7c3aed" stroke-width="1.5" fill="none" opacity="0.6"/></svg>
+      AXIOM
+    </div>
+    <h2 class="lock-title">Vault Security</h2>
+    <p class="lock-desc">Enter decryption passcode</p>
+    
+    <form onsubmit="handleUnlock(event)">
+      <div class="pass-group">
+        <input type="password" id="passcode" class="pass-input" placeholder="PASSCODE" autofocus autocomplete="current-password">
+      </div>
+      <button type="submit" class="unlock-btn">Decrypt System</button>
+      <p id="error-feedback" class="err-msg">❌ Decryption Failed. Check passcode.</p>
+    </form>
+  </div>
+</section>
+
+<!-- ANALYTICS DASHBOARD -->
+<main id="vault-dashboard">
+  
+  <!-- DASHBOARD TOP HEADER -->
+  <header class="dash-header">
+    <div class="dash-title-wrap">
+      <div class="dash-logo-icon">
+        <svg viewBox="0 0 40 40" fill="none"><path d="M20 4L36 34H4L20 4Z" stroke="#a78bfa" stroke-width="2.5" fill="none"/><path d="M20 14L28 30H12L20 14Z" stroke="#7c3aed" stroke-width="1.5" fill="none" opacity="0.6"/></svg>
+      </div>
+      <div class="dash-meta">
+        <h1>Axiom Analytics Console</h1>
+        <div class="dash-badge"><span class="pulsing-dot"></span> System Live · Decrypted</div>
+      </div>
+    </div>
+    <div class="dash-actions">
+      <a href="index.html" class="sec-btn">Live Landing Page</a>
+      <button onclick="handleLogout()" class="sec-btn logout-btn">Lock Console</button>
+    </div>
+  </header>
+
+  <!-- QUICK METRICS ROW (BENTO) -->
+  <section class="metrics-grid">
+    <!-- VISITS -->
+    <div class="metric-card lg">
+      <div>
+        <div class="m-icon m-vis">📡</div>
+        <div class="m-num" id="stat-visits">0</div>
+      </div>
+      <div class="m-label">Total Visits <span>Metric</span></div>
+    </div>
+    <!-- GOOGLE PLAY CLICKS -->
+    <div class="metric-card lg">
+      <div>
+        <div class="m-icon m-play">🛑</div>
+        <div class="m-num" id="stat-play">0</div>
+      </div>
+      <div class="m-label">Play Store Clicks <span class="m-conv" id="conv-play">0%</span></div>
+    </div>
+    <!-- IOS WAITLIST BUTTON CLICKS -->
+    <div class="metric-card lg">
+      <div>
+        <div class="m-icon m-ios">🍎</div>
+        <div class="m-num" id="stat-ios">0</div>
+      </div>
+      <div class="m-label">iOS Waitlist Clicks <span class="m-conv" id="conv-ios">0%</span></div>
+    </div>
+    <!-- EMAIL SUBMISSIONS -->
+    <div class="metric-card lg">
+      <div>
+        <div class="m-icon m-mail">📥</div>
+        <div class="m-num" id="stat-mail">0</div>
+      </div>
+      <div class="m-label">Waitlist Sign-Ups <span class="m-conv" id="conv-mail">0%</span></div>
+    </div>
+  </section>
+
+  <!-- PANEL DATA ROW -->
+  <section class="layout-row">
+    <!-- SUBMITTED CONTACTS LIST -->
+    <div class="panel lg">
+      <div class="panel-head">
+        <h2>iOS Waitlist Submissions (<span id="waitlist-count">0</span>)</h2>
+        <button onclick="exportToCSV()" class="sec-btn" style="padding:.5rem 1rem; border-radius:8px">Export CSV</button>
+      </div>
+      <div class="list-wrapper" id="waitlist-list">
+        <!-- Rendered list items -->
+      </div>
+    </div>
+
+    <!-- CONVERSION RATIOS CHART PANEL -->
+    <div class="panel lg">
+      <div class="panel-head">
+        <h2>Conversion Ratios</h2>
+      </div>
+      <div class="conv-container">
+        <!-- Play Conversion -->
+        <div class="conv-bar-wrap">
+          <div class="conv-bar-info">
+            <span>Play Store Click Ratio</span>
+            <span id="ratio-label-play">0%</span>
+          </div>
+          <div class="conv-bar-outer">
+            <div class="conv-bar-inner bg-play" id="ratio-bar-play"></div>
+          </div>
+        </div>
+        <!-- iOS Waitlist Conversion -->
+        <div class="conv-bar-wrap">
+          <div class="conv-bar-info">
+            <span>iOS Button Click Ratio</span>
+            <span id="ratio-label-ios">0%</span>
+          </div>
+          <div class="conv-bar-outer">
+            <div class="conv-bar-inner bg-ios" id="ratio-bar-ios"></div>
+          </div>
+        </div>
+        <!-- Final Waitlist Email Conversion -->
+        <div class="conv-bar-wrap">
+          <div class="conv-bar-info">
+            <span>Email Submission Ratio</span>
+            <span id="ratio-label-mail">0%</span>
+          </div>
+          <div class="conv-bar-outer">
+            <div class="conv-bar-inner bg-mail" id="ratio-bar-mail"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DEVELOPER SANDBOX MODE -->
+  <section class="sandbox-panel lg">
+    <div class="sandbox-head">⚙️ Telemetry Sandbox Mode</div>
+    <div class="sandbox-grid">
+      <div class="sandbox-control">
+        <label for="sb-visits">Simulate Visits</label>
+        <input type="number" id="sb-visits" value="250">
+      </div>
+      <div class="sandbox-control">
+        <label for="sb-play">Simulate Play Clicks</label>
+        <input type="number" id="sb-play" value="45">
+      </div>
+      <div class="sandbox-control">
+        <label for="sb-ios">Simulate iOS Clicks</label>
+        <input type="number" id="sb-ios" value="38">
+      </div>
+      <div class="sandbox-control">
+        <label for="sb-emails">Mock Waitlist Count</label>
+        <input type="number" id="sb-emails" value="8" disabled>
+      </div>
+    </div>
+    <div class="sandbox-btns">
+      <button onclick="applySandbox()" class="sec-btn" style="background:rgba(124,58,237,.15); color:#c084fc; border-color:rgba(124,58,237,.3)">Apply Mock Data</button>
+      <button onclick="injectMockEmails()" class="sec-btn" style="border-color:rgba(52,211,153,.2)">Inject 8 Mock Emails</button>
+      <button onclick="resetConsoleMetrics()" class="sec-btn" style="color:#f43f5e; border-color:rgba(244,63,94,.2)">Reset All Local Data</button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// Secure verification via client-side SHA-256
+const EXPECTED_HASH = '0acbf84757d057b4eaf593501359e26e0504de13993d6d08f8a383e97bdec5cd'; // 'axiom'
+
+async function sha256(message) {
+  const msgBuffer = new TextEncoder().encode(message);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Session check
+window.addEventListener('load', () => {
+  if (sessionStorage.getItem('axiom-vault-authorized') === 'true') {
+    showDashboard();
+  }
+});
+
+// PASSCODE FORM SUBMIT
+async function handleUnlock(e) {
+  e.preventDefault();
+  const input = document.getElementById('passcode').value;
+  const errorEl = document.getElementById('error-feedback');
+  
+  const hash = await sha256(input);
+  if (hash === EXPECTED_HASH) {
+    sessionStorage.setItem('axiom-vault-authorized', 'true');
+    errorEl.style.opacity = 0;
+    
+    // Unlock animation
+    gsap.to('.lock-card', {
+      scale: 0.8,
+      opacity: 0,
+      duration: 0.6,
+      ease: 'power3.in',
+      onComplete: () => {
+        document.getElementById('vault-lock').style.display = 'none';
+        showDashboard();
+      }
+    });
+  } else {
+    // Shake animation
+    gsap.fromTo('.lock-card', {x: -12}, {x: 0, duration: 0.5, ease: 'elastic.out(1, 0.3)'});
+    errorEl.style.opacity = 1;
+    document.getElementById('passcode').value = '';
+    document.getElementById('passcode').focus();
+  }
+}
+
+// LOGOUT
+function handleLogout() {
+  sessionStorage.removeItem('axiom-vault-authorized');
+  gsap.to('#vault-dashboard', {
+    opacity: 0,
+    y: 20,
+    duration: 0.4,
+    ease: 'power3.in',
+    onComplete: () => {
+      document.getElementById('vault-dashboard').style.display = 'none';
+      document.getElementById('vault-lock').style.display = 'flex';
+      document.getElementById('passcode').value = '';
+      gsap.to('.lock-card', {scale: 1, opacity: 1, duration: 0.1});
+    }
+  });
+}
+
+// SHOW DASHBOARD
+function showDashboard() {
+  document.getElementById('vault-dashboard').style.display = 'block';
+  gsap.fromTo('#vault-dashboard', {opacity: 0, y: 30}, {opacity: 1, y: 0, duration: 1.2, ease: 'power4.out'});
+  
+  loadMetrics();
+}
+
+// LOAD METRICS DATA
+function loadMetrics() {
+  // Read local storage keys
+  const visits = parseInt(localStorage.getItem('axiom-metrics-visits') || '0');
+  const playClicks = parseInt(localStorage.getItem('axiom-metrics-clicks-play') || '0');
+  const iosClicks = parseInt(localStorage.getItem('axiom-metrics-clicks-ios') || '0');
+  const waitlist = JSON.parse(localStorage.getItem('axiom-waitlist') || '[]');
+  const emailCount = waitlist.length;
+
+  // Render numerical values
+  animateNumber('stat-visits', visits);
+  animateNumber('stat-play', playClicks);
+  animateNumber('stat-ios', iosClicks);
+  animateNumber('stat-mail', emailCount);
+  document.getElementById('waitlist-count').innerText = emailCount;
+  document.getElementById('sb-emails').value = emailCount;
+
+  // Calculate conversions (gracefully handle division by zero)
+  const calcPercent = (part, total) => total > 0 ? ((part / total) * 100).toFixed(1) + '%' : '0.0%';
+  
+  const playConv = calcPercent(playClicks, visits);
+  const iosConv = calcPercent(iosClicks, visits);
+  const mailConv = calcPercent(emailCount, visits);
+
+  document.getElementById('conv-play').innerText = playConv;
+  document.getElementById('conv-ios').innerText = iosConv;
+  document.getElementById('conv-mail').innerText = mailConv;
+
+  document.getElementById('ratio-label-play').innerText = playConv;
+  document.getElementById('ratio-label-ios').innerText = iosConv;
+  document.getElementById('ratio-label-mail').innerText = mailConv;
+
+  // Animate ratio bars
+  const setBarWidth = (id, percent) => {
+    document.getElementById(id).style.width = percent;
+  };
+  setBarWidth('ratio-bar-play', playConv);
+  setBarWidth('ratio-bar-ios', iosConv);
+  setBarWidth('ratio-bar-mail', mailConv);
+
+  // Render Waitlist
+  renderWaitlist(waitlist);
+}
+
+// ANIMATED NUMBER REVEAL
+function animateNumber(id, endValue) {
+  const el = document.getElementById(id);
+  const obj = { val: 0 };
+  gsap.to(obj, {
+    val: endValue,
+    duration: 1.5,
+    ease: 'power3.out',
+    snap: { val: 1 },
+    onUpdate: () => { el.innerText = obj.val; }
+  });
+}
+
+// RENDER WAITLIST ITEMS
+function renderWaitlist(list) {
+  const listEl = document.getElementById('waitlist-list');
+  listEl.innerHTML = '';
+
+  if (list.length === 0) {
+    listEl.innerHTML = '<div class="empty-state">No waitlist submissions recorded. All quiet.</div>';
+    return;
+  }
+
+  // Render in reverse chronological order
+  [...list].reverse().forEach(item => {
+    const date = new Date(item.date);
+    const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
+    
+    const itemEl = document.createElement('div');
+    itemEl.className = 'list-item';
+    itemEl.innerHTML = `
+      <span class="item-email">${escapeHtml(item.email)}</span>
+      <span class="item-date">${dateStr}</span>
+    `;
+    listEl.appendChild(itemEl);
+  });
+}
+
+// EXPORT TO CSV
+function exportToCSV() {
+  const list = JSON.parse(localStorage.getItem('axiom-waitlist') || '[]');
+  if (list.length === 0) {
+    alert('No waitlist entries available to export.');
+    return;
+  }
+
+  let csvContent = 'data:text/csv;charset=utf-8,';
+  csvContent += 'Email,Submission Date (UTC)\n';
+  
+  list.forEach(item => {
+    csvContent += `"${item.email.replace(/"/g, '""')}","${item.date}"\n`;
+  });
+
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement('a');
+  link.setAttribute('href', encodedUri);
+  link.setAttribute('download', `axiom_waitlist_${new Date().toISOString().split('T')[0]}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// DEVELOPER SANDBOX CONTROLS
+function applySandbox() {
+  const visits = document.getElementById('sb-visits').value;
+  const play = document.getElementById('sb-play').value;
+  const ios = document.getElementById('sb-ios').value;
+
+  localStorage.setItem('axiom-metrics-visits', visits);
+  localStorage.setItem('axiom-metrics-clicks-play', play);
+  localStorage.setItem('axiom-metrics-clicks-ios', ios);
+
+  loadMetrics();
+}
+
+function injectMockEmails() {
+  const list = JSON.parse(localStorage.getItem('axiom-waitlist') || '[]');
+  const mockDomains = ['gmail.com', 'outlook.com', 'yahoo.com', 'icloud.com', 'proton.me'];
+  const mockPrefixes = ['neuro', 'recovery', 'clean_days', 'dopamine', 'mindful', 'sober', 'axiom', 'healer'];
+  
+  for (let i = 0; i < 8; i++) {
+    const randomPrefix = mockPrefixes[Math.floor(Math.random() * mockPrefixes.length)] + '_' + Math.floor(Math.random() * 899 + 100);
+    const randomDomain = mockDomains[Math.floor(Math.random() * mockDomains.length)];
+    const dateOffset = Math.random() * 5 * 24 * 60 * 60 * 1000; // random offset up to 5 days
+    
+    list.push({
+      email: `${randomPrefix}@${randomDomain}`,
+      date: new Date(Date.now() - dateOffset).toISOString()
+    });
+  }
+
+  localStorage.setItem('axiom-waitlist', JSON.stringify(list));
+  localStorage.setItem('axiom-metrics-emails', list.length.toString());
+
+  loadMetrics();
+}
+
+function resetConsoleMetrics() {
+  if (confirm('⚠️ WARNING: This will permanently wipe all visits, clicks, and Waitlist emails in local storage. Are you sure?')) {
+    localStorage.removeItem('axiom-metrics-visits');
+    localStorage.removeItem('axiom-metrics-clicks-play');
+    localStorage.removeItem('axiom-metrics-clicks-ios');
+    localStorage.removeItem('axiom-metrics-emails');
+    localStorage.removeItem('axiom-waitlist');
+    
+    document.getElementById('sb-visits').value = 0;
+    document.getElementById('sb-play').value = 0;
+    document.getElementById('sb-ios').value = 0;
+    document.getElementById('sb-emails').value = 0;
+
+    loadMetrics();
+  }
+}
+
+// ESCAPE HTML HELPER
+function escapeHtml(str) {
+  return str.replace(/[&<>'"]/g, 
+    tag => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag] || tag)
+  );
+}
+</script>
+</body>
+</html>
